@@ -182,6 +182,13 @@ Both binaries default to the host architecture; `ARCHS` (see above) adds slices
 that are combined with `lipo` for a universal app.
 The app is a thin front end that shells out to that bundled binary.
 
+**The app targets macOS 13** (`MACOS_DEPLOYMENT_TARGET` in
+`scripts/build-app.sh`, `LSMinimumSystemVersion` in `gui/Info.plist` — keep the
+two in step). `swiftc -warnings-as-errors` rejects an API newer than the
+deployment target, so macOS 14+ SwiftUI types need an `if #available(macOS 14.0, *)`
+branch with a macOS 13 fallback: `ContentView.swift`'s `SimulatorEmptyState`
+wraps `ContentUnavailableView` (macOS 14) that way.
+
 ## Safety invariants — preserve these
 
 - **Never add a deadlock-prone daemon to `Categories`.** A handful of daemons wedge

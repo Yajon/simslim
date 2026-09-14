@@ -1,21 +1,23 @@
 # simslim
 
+[中文](README.zh-CN.md) | [English](README.md)
+
 Run a lot more iOS, Apple TV (tvOS), Apple Watch (watchOS), and Apple Vision Pro (visionOS) simulators on one Mac by turning off the background daemons a simulator doesn't need.
 
 A freshly booted iOS simulator starts around 180 background services: Siri, Spotlight indexing, photo analysis, News, wallpaper posters, iCloud sync, and so on. None of it matters when you're using the simulator for development, testing, or CI. simslim switches those services off, which cuts each simulator's memory roughly 4x. On the same laptop you go from a handful of simulators to a screenful.
 
 https://github.com/user-attachments/assets/f4665e41-43b4-49cd-9388-3da533e9fd7b
 
-*12 slim simulators on a 16 GB M1 Pro, each driven by its own Claude Code agent through MobAI. Stock simulators start thrashing at around 5.*
+_12 slim simulators on a 16 GB M1 Pro, each driven by its own Claude Code agent through MobAI. Stock simulators start thrashing at around 5._
 
 ## Numbers
 
 One simulator, booted stock and then slimmed, same device and settle time (M1 Pro, 16 GB):
 
-| | Stock | Slim |
-|---|---|---|
-| Processes | 258 | 70 |
-| Memory | 4.0 GB | 0.9 GB |
+|           | Stock  | Slim   |
+| --------- | ------ | ------ |
+| Processes | 258    | 70     |
+| Memory    | 4.0 GB | 0.9 GB |
 
 Memory here is phys_footprint, the figure Activity Monitor shows, which counts compressed and swapped pages. That's what decides how many simulators fit before the machine starts swapping. Run `simslim measure <udid>` to see it for any booted simulator.
 
