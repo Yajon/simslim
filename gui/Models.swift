@@ -5,6 +5,8 @@ enum SlimmingMode: String, CaseIterable, Identifiable {
   case disk = "Disk Size"
 
   var id: String { rawValue }
+
+  var localizedName: String { tr(rawValue) }
 }
 
 struct SimulatorDevice: Decodable, Identifiable, Equatable {
@@ -37,11 +39,11 @@ struct SlimCategory: Decodable, Identifiable, Equatable {
   }
 
   var approximateMemoryText: String {
-    "Uses ~\(approxMemoryMB) MB RAM"
+    tr("Uses ~%d MB RAM", approxMemoryMB)
   }
 
   func serviceDescription(for label: String) -> String {
-    serviceDescriptions?[label] ?? "Apple background service."
+    serviceDescriptions?[label].map(tr) ?? tr("Apple background service.")
   }
 }
 
@@ -156,10 +158,10 @@ enum ServiceSlimState: Equatable {
 
   var title: String {
     switch self {
-    case .stock: return "Stock"
-    case .partial(let disabled, let total): return "Partial (\(disabled)/\(total))"
-    case .full(let total): return "Fully slim (\(total)/\(total))"
-    case .unknown: return "Unknown while shutdown"
+    case .stock: return tr("Stock")
+    case .partial(let disabled, let total): return tr("Partial (%d/%d)", disabled, total)
+    case .full(let total): return tr("Fully slim (%d/%d)", total, total)
+    case .unknown: return tr("Unknown while shutdown")
     }
   }
 

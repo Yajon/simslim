@@ -4,11 +4,13 @@ import SwiftUI
 @main
 struct SimSlimApp: App {
   @StateObject private var model = AppModel()
+  @StateObject private var localization = Localization.shared
 
   var body: some Scene {
     WindowGroup {
       ContentView()
         .environmentObject(model)
+        .environmentObject(localization)
         .background(ToolbarDisplayModeConfigurator().frame(width: 0, height: 0))
         .frame(minWidth: 1080, minHeight: 700)
         .task { await model.load() }
@@ -18,13 +20,27 @@ struct SimSlimApp: App {
     .windowToolbarStyle(.unified(showsTitle: false))
     .commands {
       CommandGroup(after: .toolbar) {
-        Button("Refresh Simulators") {
+        Button(tr("Refresh Simulators")) {
           Task { await model.refresh() }
         }
         .keyboardShortcut("r", modifiers: .command)
         .disabled(model.isBusy)
       }
+      CommandGroup(after: .appSettings) {
+        Picker(tr("Language"), selection: localizationSelection) {
+          ForEach(AppLanguage.allCases) { language in
+            Text(language.displayName).tag(language)
+          }
+        }
+      }
     }
+  }
+
+  private var localizationSelection: Binding<AppLanguage> {
+    Binding(
+      get: { localization.selectedLanguage },
+      set: { localization.selectLanguage($0) }
+    )
   }
 }
 
@@ -109,13 +125,15 @@ private final class ToolbarDisplayModeView: NSView {
 
   private func arrangeFlexibleSpaces(in toolbar: NSToolbar) {
     guard !isArrangingToolbar else { return }
-    guard toolbar.items.contains(where: { $0.label == "Rename" }) else { return }
+    let renameLabel = tr("Rename")
+    guard toolbar.items.contains(where: { $0.label == renameLabel }) else { return }
 
+    let unslimLabel = tr("Unslim")
     let boundaryLabels = [
-      toolbar.items.contains(where: { $0.label == "Unslim" }) ? "Unslim" : "Clean Disk",
-      "Delete",
-      "Rename",
-      "Selection",
+      toolbar.items.contains(where: { $0.label == unslimLabel }) ? unslimLabel : tr("Clean Disk"),
+      tr("Delete"),
+      renameLabel,
+      tr("Selection"),
     ]
 
     let spaceIndices = toolbar.items.indices.filter {
