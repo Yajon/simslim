@@ -35,9 +35,10 @@ if [[ ! -f "$ICON_SOURCE" ]]; then
 fi
 
 # ARCHS selects the architectures bundled into SimSlim.app. It accepts one or
-# more of arm64 / x86_64 separated by commas or spaces, plus `universal` as
-# shorthand for both. Unset or empty builds only the build machine's
-# architecture.
+# more of arm64 / x86_64 separated by commas or spaces, `universal` as
+# shorthand for both, and `all` for both plus one thin bundle per architecture
+# (build/SimSlim-arm64.app, build/SimSlim-x86_64.app). Unset or empty builds
+# only the build machine's architecture.
 normalize_arch() {
   case "$1" in
     arm64|aarch64) print -r -- arm64 ;;
@@ -55,14 +56,19 @@ go_arch_for() {
 }
 
 SELECTED_ARCHS=()
+PER_ARCH_BUNDLES=0
 REQUESTED_ARCHS="${ARCHS:-$MACHINE_ARCH}"
 REQUESTED_ARCHS="${REQUESTED_ARCHS//,/ }"
 for token in ${=REQUESTED_ARCHS}; do
   case "$token" in
-    universal|all|both) candidates=(arm64 x86_64) ;;
+    universal|both) candidates=(arm64 x86_64) ;;
+    all)
+      candidates=(arm64 x86_64)
+      PER_ARCH_BUNDLES=1
+      ;;
     *)
       if ! candidate="$(normalize_arch "$token")"; then
-        echo "Unsupported architecture: $token (supported: arm64, x86_64, universal)." >&2
+        echo "Unsupported architecture: $token (supported: arm64, x86_64, universal, all)." >&2
         exit 1
       fi
       candidates=("$candidate")
@@ -74,7 +80,7 @@ for token in ${=REQUESTED_ARCHS}; do
 done
 
 if (( ${#SELECTED_ARCHS} == 0 )); then
-  echo "ARCHS did not name any architecture. Use arm64, x86_64, or universal." >&2
+  echo "ARCHS did not name any architecture. Use arm64, x86_64, universal, or all." >&2
   exit 1
 fi
 
@@ -84,6 +90,30 @@ if (( ${#SELECTED_ARCHS} == 1 )); then
 else
   echo "Target architectures: $ARCHS_LABEL (universal)"
 fi
+if (( PER_ARCH_BUNDLES )) && (( ${#SELECTED_ARCHS} == 1 )); then
+  echo "ARCHS=all needs more than one architecture; building $ARCHS_LABEL only." >&2
+  PER_ARCH_BUNDLES=0
+fi
+
+# A per-architecture bundle carries exactly one slice, the one it is named for.
+assert_single_arch() {
+  local binary="$1" expected="$2" actual
+  actual="$(lipo -archs "$binary")"
+  if [[ "$actual" != "$expected" ]]; then
+    echo "$binary has architecture '$actual'; expected '$expected'." >&2
+    exit 1
+  fi
+}
+
+# The CLI slot must hold the Go binary, not the SwiftUI app (they are easy to
+# mix up while staging slices, and a swap builds a bundle that cannot run).
+assert_go_cli() {
+  local binary="$1"
+  if ! otool -l "$binary" 2>/dev/null | grep -q __go_buildinfo; then
+    echo "$binary is not the Go CLI; the app and CLI slices were mixed up." >&2
+    exit 1
+  fi
+}
 
 STAGING_DIR="$(mktemp -d "${TMPDIR:-/tmp}/simslim-app.XXXXXX")"
 trap 'rm -rf "$STAGING_DIR"' EXIT
@@ -134,7 +164,9 @@ iconutil -c icns "$ICONSET_DIR" -o "$STAGED_APP/Contents/Resources/SimSlim.icns"
 echo "Building bundled simslim CLI ($ARCHS_LABEL)…"
 GO_SLICES=()
 for arch in "${SELECTED_ARCHS[@]}"; do
-  slice="$STAGING_DIR/simslim-$arch"
+  # Slices are named cli-*/app-*: on macOS's default case-insensitive
+  # filesystem simslim-arm64 and SimSlim-arm64 would be the same file.
+  slice="$STAGING_DIR/cli-$arch"
   (
     cd "$ROOT_DIR"
     CGO_ENABLED=0 GOOS=darwin GOARCH="$(go_arch_for "$arch")" \
@@ -145,7 +177,7 @@ for arch in "${SELECTED_ARCHS[@]}"; do
 done
 CLI_BINARY="$STAGED_APP/Contents/Resources/simslim"
 if (( ${#GO_SLICES} == 1 )); then
-  mv "${GO_SLICES[1]}" "$CLI_BINARY"
+  cp "${GO_SLICES[1]}" "$CLI_BINARY"
 else
   lipo -create -output "$CLI_BINARY" "${GO_SLICES[@]}"
 fi
@@ -162,7 +194,7 @@ SWIFT_SOURCES=(
 )
 SWIFT_SLICES=()
 for arch in "${SELECTED_ARCHS[@]}"; do
-  slice="$STAGING_DIR/SimSlim-$arch"
+  slice="$STAGING_DIR/app-$arch"
   xcrun swiftc \
     -swift-version 5 \
     -warnings-as-errors \
@@ -176,9 +208,31 @@ for arch in "${SELECTED_ARCHS[@]}"; do
     -o "$slice"
   SWIFT_SLICES+=("$slice")
 done
+
+# `ARCHS=all` also emits a thin bundle per architecture beside the main one, so a
+# single build hands out arch-specific downloads. Each starts as a copy of the
+# skeleton (Info.plist, icon, localizations) and gets that architecture's slice.
+if (( PER_ARCH_BUNDLES )); then
+  echo "Assembling per-architecture bundles…"
+  mkdir -p "$BUILD_DIR"
+  for arch in "${SELECTED_ARCHS[@]}"; do
+    ARCH_BUNDLE="$BUILD_DIR/SimSlim-$arch.app"
+    rm -rf "$ARCH_BUNDLE"
+    cp -R "$STAGED_APP" "$ARCH_BUNDLE"
+    cp "$STAGING_DIR/cli-$arch" "$ARCH_BUNDLE/Contents/Resources/simslim"
+    cp "$STAGING_DIR/app-$arch" "$ARCH_BUNDLE/Contents/MacOS/SimSlim"
+    chmod +x "$ARCH_BUNDLE/Contents/MacOS/SimSlim" "$ARCH_BUNDLE/Contents/Resources/simslim"
+    codesign --force --deep --sign - "$ARCH_BUNDLE" >/dev/null
+    assert_single_arch "$ARCH_BUNDLE/Contents/MacOS/SimSlim" "$arch"
+    assert_single_arch "$ARCH_BUNDLE/Contents/Resources/simslim" "$arch"
+    assert_go_cli "$ARCH_BUNDLE/Contents/Resources/simslim"
+    echo "Built $ARCH_BUNDLE ($arch)"
+  done
+fi
+
 APP_BINARY="$STAGED_APP/Contents/MacOS/SimSlim"
 if (( ${#SWIFT_SLICES} == 1 )); then
-  mv "${SWIFT_SLICES[1]}" "$APP_BINARY"
+  cp "${SWIFT_SLICES[1]}" "$APP_BINARY"
 else
   lipo -create -output "$APP_BINARY" "${SWIFT_SLICES[@]}"
 fi
@@ -206,6 +260,7 @@ chmod +x "$STAGED_APP/Contents/MacOS/SimSlim" "$STAGED_APP/Contents/Resources/si
 codesign --force --deep --sign - "$STAGED_APP" >/dev/null
 assert_archs "$STAGED_APP/Contents/MacOS/SimSlim"
 assert_archs "$STAGED_APP/Contents/Resources/simslim"
+assert_go_cli "$STAGED_APP/Contents/Resources/simslim"
 
 mkdir -p "$BUILD_DIR"
 if [[ -e "$APP_PATH" ]]; then

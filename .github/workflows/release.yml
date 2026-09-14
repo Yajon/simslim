@@ -10,6 +10,12 @@ on:
         required: true
         type: string
 
+# One release per tag: a re-run queues behind the first one instead of racing
+# it in the publish job.
+concurrency:
+  group: release-${{ inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
 env:
   SIMSLIM_RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
 
@@ -17,22 +23,79 @@ permissions:
   contents: write
 
 jobs:
-  release:
+  app:
+    name: macOS app bundles
+    runs-on: macos-26
+    timeout-minutes: 30
+    if: github.event_name == 'push'
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_26.6.app/Contents/Developer
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Build universal app plus one bundle per architecture
+        run: |
+          VERSION="${SIMSLIM_RELEASE_TAG}" BUILD_NUMBER="${GITHUB_RUN_NUMBER}" \
+            make app ARCHS=all
+      - name: Verify bundles
+        run: |
+          test "$(plutil -extract CFBundleVersion raw build/SimSlim.app/Contents/Info.plist)" = "${GITHUB_RUN_NUMBER}"
+          test "$(build/SimSlim.app/Contents/Resources/simslim --version)" = "simslim ${SIMSLIM_RELEASE_TAG}"
+          for bundle in build/SimSlim*.app; do
+            codesign --verify --deep --strict --verbose=2 "$bundle"
+            plutil -lint "$bundle/Contents/Info.plist"
+            echo "$bundle app=$(lipo -archs "$bundle/Contents/MacOS/SimSlim") cli=$(lipo -archs "$bundle/Contents/Resources/simslim")"
+          done
+      - name: Package
+        run: |
+          cd build
+          for bundle in SimSlim*.app; do
+            name="${bundle%.app}"
+            case "$name" in
+              SimSlim) label=universal ;;
+              *) label="${name#SimSlim-}" ;;
+            esac
+            ditto -c -k --sequesterRsrc --keepParent "$bundle" \
+              "SimSlim-${SIMSLIM_RELEASE_TAG}-macos-${label}.zip"
+          done
+          ls -lh SimSlim-*.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: app
+          path: build/SimSlim-*.zip
+          if-no-files-found: error
+
+  cli:
+    name: CLI tarball
     runs-on: macos-14
+    timeout-minutes: 15
+    if: github.event_name == 'push'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
       - name: Build
-        if: github.event_name == 'push'
         run: |
-          SIMSLIM_VERSION="${SIMSLIM_RELEASE_TAG#v}"
           go test ./...
-          go build -ldflags "-X main.version=${SIMSLIM_VERSION}" -o simslim ./cmd/simslim
+          go build -ldflags "-X main.version=${SIMSLIM_RELEASE_TAG#v}" -o simslim ./cmd/simslim
           codesign --force --sign - simslim
           tar -czf "simslim-${SIMSLIM_RELEASE_TAG}-macos-arm64.tar.gz" simslim
           shasum -a 256 "simslim-${SIMSLIM_RELEASE_TAG}-macos-arm64.tar.gz"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cli
+          path: simslim-*-macos-arm64.tar.gz
+          if-no-files-found: error
+
+  bottle:
+    name: Homebrew bottle
+    runs-on: macos-14
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
       - name: Build Homebrew bottle
         run: |
           SIMSLIM_SOURCE_URL="https://github.com/${GITHUB_REPOSITORY}/archive/refs/tags/${SIMSLIM_RELEASE_TAG}.tar.gz"
@@ -62,11 +125,40 @@ jobs:
           for SIMSLIM_BOTTLE in simslim--*.bottle*.tar.gz; do
             mv "${SIMSLIM_BOTTLE}" "${SIMSLIM_BOTTLE/--/-}"
           done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bottle
+          path: simslim-*.bottle*.tar.gz
+          if-no-files-found: error
+
+  # Collects everything the build jobs produced and publishes it as one release,
+  # so the tag carries the app bundles, the CLI tarball and the bottle together.
+  publish:
+    name: Publish release
+    needs: [app, cli, bottle]
+    # Publishes whatever the build jobs managed to produce: one failed artifact
+    # (a flaky bottle, say) must not withhold the app bundles from the release.
+    if: ${{ !cancelled() && (needs.app.result == 'success' || needs.cli.result == 'success' || needs.bottle.result == 'success') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - name: Checksum the assets
+        run: |
+          cd dist
+          test -n "$(ls -A)" || { echo "No release artifacts were produced." >&2; exit 1; }
+          # A manual run only refreshes the bottle, so it must not replace the
+          # complete manifest written by the tag build with a bottle-only one.
+          if [ "${GITHUB_EVENT_NAME}" = "push" ]; then
+            sha256sum * > SHA256SUMS.txt
+          fi
+          ls -l
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.SIMSLIM_RELEASE_TAG }}
           generate_release_notes: true
-          files: |
-            simslim-*-macos-arm64.tar.gz
-            simslim-*.bottle*.tar.gz
+          files: dist/*

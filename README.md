@@ -80,6 +80,7 @@ Build it locally with Go and Xcode:
 make app                       # this machine's architecture
 make app ARCHS=arm64,x86_64    # universal (both architectures)
 make app ARCHS=arm64           # a single architecture
+make app ARCHS=all             # universal + one bundle per architecture
 open build/SimSlim.app
 ```
 
@@ -87,6 +88,12 @@ open build/SimSlim.app
 `universal` as shorthand for both. Both the app and the bundled `simslim` CLI
 are built for every requested architecture and lipo-joined into one binary;
 omitting `ARCHS` builds only the architecture of the machine running the build.
+
+`ARCHS=all` additionally writes a thin bundle per architecture next to the main
+one, so one build yields `build/SimSlim.app` (universal) plus
+`build/SimSlim-arm64.app` and `build/SimSlim-x86_64.app`. Pushing a `v*` tag
+zips every bundle it finds and publishes them, the CLI tarball, and the
+Homebrew bottle to one GitHub release.
 
 Memory estimates are guidance rather than additive savings; see the
 [measurement method](docs/category-memory.md). SimSlim recommends cloning before

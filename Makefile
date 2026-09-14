@@ -3,13 +3,15 @@
 VERSION ?= $(shell git describe --tags --always --dirty)
 
 # ARCHS selects the architectures bundled into SimSlim.app. Accepts `arm64`,
-# `x86_64`, a comma/space-separated list of both, or `universal` as shorthand
-# for `arm64,x86_64`. Empty (the default) builds only this machine's
-# architecture.
+# `x86_64`, a comma/space-separated list of both, `universal` as shorthand for
+# `arm64,x86_64`, or `all` for both plus one thin bundle per architecture.
+# Empty (the default) builds only this machine's architecture.
 #   make app                       # host architecture
 #   make app ARCHS=arm64           # Apple silicon only
 #   make app ARCHS=x86_64          # Intel only
 #   make app ARCHS=arm64,x86_64    # universal
+#   make app ARCHS=universal       # instead of arm64,x86_64
+#   make app ARCHS=all             # universal + SimSlim-arm64.app + SimSlim-x86_64.app
 ARCHS ?=
 
 cli:
