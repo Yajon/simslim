@@ -88,9 +88,7 @@ struct ContentView: View {
         }
       }
 
-      if #available(macOS 26.0, *) {
-        ToolbarSpacer(.flexible)
-      }
+      ToolbarItem { Spacer() }
 
       ToolbarItemGroup(placement: .automatic) {
         Button {
@@ -119,9 +117,7 @@ struct ContentView: View {
         .help("Delete Simulator")
       }
 
-      if #available(macOS 26.0, *) {
-        ToolbarSpacer(.flexible)
-      }
+      ToolbarItem { Spacer() }
 
       ToolbarItemGroup(placement: .automatic) {
         Button {
@@ -158,9 +154,7 @@ struct ContentView: View {
         .help("Rename Simulator")
       }
 
-      if #available(macOS 26.0, *) {
-        ToolbarSpacer(.flexible)
-      }
+      ToolbarItem { Spacer() }
 
       ToolbarItemGroup(placement: .automatic) {
         Button {
@@ -182,9 +176,7 @@ struct ContentView: View {
         .disabled(model.isBusy)
       }
 
-      if #available(macOS 26.0, *) {
-        ToolbarSpacer(.flexible)
-      }
+      ToolbarItem { Spacer() }
 
       ToolbarItem(placement: .automatic) {
         CollapsibleToolbarSearch(

@@ -734,6 +734,7 @@ final class AppModel: ObservableObject {
   }
 
   private func loadDiskSizes(for snapshot: [SimulatorDevice], backend: SimSlimBackend) async {
+    var results: [(udid: String, measurement: SimulatorDiskMeasurement?)] = []
     await withTaskGroup(of: (String, SimulatorDiskMeasurement?).self) { group in
       var nextIndex = 0
       let concurrentMeasurements = min(3, snapshot.count)
@@ -747,11 +748,8 @@ final class AppModel: ObservableObject {
         }
       }
 
-      while let (udid, measurement) = await group.next() {
-        if devices.contains(where: { $0.udid == udid }), let measurement {
-          diskSizes[udid] = measurement
-        }
-        diskSizeLoadingUDIDs.remove(udid)
+      while let result = await group.next() {
+        results.append((udid: result.0, measurement: result.1))
 
         if nextIndex < snapshot.count {
           let device = snapshot[nextIndex]
@@ -762,6 +760,13 @@ final class AppModel: ObservableObject {
           }
         }
       }
+    }
+
+    for (udid, measurement) in results {
+      if devices.contains(where: { $0.udid == udid }), let measurement {
+        diskSizes[udid] = measurement
+      }
+      diskSizeLoadingUDIDs.remove(udid)
     }
 
     let available = Set(devices.map(\.udid))
