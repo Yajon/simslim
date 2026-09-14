@@ -315,13 +315,12 @@ struct ContentView: View {
             }
             .frame(width: geometry.size.width, height: geometry.size.height)
           } else if filteredDevices.isEmpty {
-            ContentUnavailableView(
-              searchText.isEmpty ? tr("No iOS Simulators") : tr("No Matches"),
+            SimulatorEmptyState(
+              title: searchText.isEmpty ? tr("No iOS Simulators") : tr("No Matches"),
               systemImage: "iphone.slash",
-              description: Text(
-                searchText.isEmpty
-                  ? tr("Install an iOS Simulator runtime in Xcode.")
-                  : tr("Try a different name, UDID, or iOS version."))
+              description: searchText.isEmpty
+                ? tr("Install an iOS Simulator runtime in Xcode.")
+                : tr("Try a different name, UDID, or iOS version.")
             )
             .frame(width: geometry.size.width, height: geometry.size.height)
           } else {
@@ -1651,6 +1650,44 @@ private struct LanguageMenu: View {
     .menuStyle(.borderlessButton)
     .fixedSize()
     .accessibilityLabel(tr("Language"))
+  }
+}
+
+/// `ContentUnavailableView` is macOS 14 and newer; macOS 13 gets an equivalent
+/// placeholder with the same symbol, title, and description.
+private struct SimulatorEmptyState: View {
+  let title: String
+  let systemImage: String
+  let description: String
+
+  @ViewBuilder
+  var body: some View {
+    if #available(macOS 14.0, *) {
+      ContentUnavailableView(
+        title,
+        systemImage: systemImage,
+        description: Text(description)
+      )
+    } else {
+      VStack(spacing: 9) {
+        Image(systemName: systemImage)
+          .font(.system(size: 44, weight: .regular))
+          .foregroundStyle(.tertiary)
+          .padding(.bottom, 2)
+
+        Text(title)
+          .font(.title2.weight(.semibold))
+
+        Text(description)
+          .font(.subheadline)
+          .foregroundStyle(.secondary)
+          .multilineTextAlignment(.center)
+          .fixedSize(horizontal: false, vertical: true)
+      }
+      .padding(24)
+      .frame(maxWidth: .infinity, maxHeight: .infinity)
+      .accessibilityElement(children: .combine)
+    }
   }
 }
 

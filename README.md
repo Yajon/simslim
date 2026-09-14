@@ -1,21 +1,23 @@
 # simslim
 
+[中文](README.zh-CN.md) | [English](README.md)
+
 Run a lot more iOS simulators on one Mac by turning off the background daemons a simulator doesn't need.
 
 A freshly booted iOS simulator starts around 180 background services: Siri, Spotlight indexing, photo analysis, News, wallpaper posters, iCloud sync, and so on. None of it matters when you're using the simulator for development, testing, or CI. simslim switches those services off, which cuts each simulator's memory roughly 4x. On the same laptop you go from a handful of simulators to a screenful.
 
 https://github.com/user-attachments/assets/f4665e41-43b4-49cd-9388-3da533e9fd7b
 
-*12 slim simulators on a 16 GB M1 Pro, each driven by its own Claude Code agent through MobAI. Stock simulators start thrashing at around 5.*
+_12 slim simulators on a 16 GB M1 Pro, each driven by its own Claude Code agent through MobAI. Stock simulators start thrashing at around 5._
 
 ## Numbers
 
 One simulator, booted stock and then slimmed, same device and settle time (M1 Pro, 16 GB):
 
-| | Stock | Slim |
-|---|---|---|
-| Processes | 258 | 70 |
-| Memory | 4.0 GB | 0.9 GB |
+|           | Stock  | Slim   |
+| --------- | ------ | ------ |
+| Processes | 258    | 70     |
+| Memory    | 4.0 GB | 0.9 GB |
 
 Memory here is phys_footprint, the figure Activity Monitor shows, which counts compressed and swapped pages. That's what decides how many simulators fit before the machine starts swapping. Run `simslim measure <udid>` to see it for any booted simulator.
 
@@ -119,23 +121,23 @@ simslim on <udid> --keep com.apple.apsd
 <details>
 <summary>All slimming categories</summary>
 
-| ID | Category | Turns off | ~MB |
-|---|---|---|---|
-| `widgets` | Widgets & Wallpaper | Home and lock screen posters, widgets, and Live Activities. | 675 |
-| `siri` | Siri & Intelligence | Siri, Apple Intelligence, speech, and on-device ML model services. | 265 |
-| `search` | Spotlight & Search | On-device Spotlight and in-Settings search services. | 50 |
-| `icloud` | iCloud & Apple Account | iCloud sync, Apple Account, keychain, and backup services. | 100 |
-| `store` | App Store, Push & Media | App Store, push notification, StoreKit, and media services. | 80 |
-| `pim` | Mail, Calendar & Contacts | Mail, Calendar, Contacts, Reminders, and related sync services. | 80 |
-| `web` | Safari Sync & Web Services | Safari sync, web push, privacy, and universal-link services. | 50 |
-| `family` | Family & Screen Time | Family Sharing, Screen Time, and usage tracking. | 65 |
-| `health` | Health, Home & Fitness | HealthKit, HomeKit, and Fitness services. | 135 |
-| `photos` | Photos & Media Analysis | Photos library, photo analysis, and media analysis services. | 60 |
-| `apps` | News, Weather, Maps & Games | News, Weather, Maps, Tips, and game services. | 90 |
-| `messaging` | Messaging & FaceTime | iMessage, FaceTime, call, and identity services. | 60 |
-| `connectivity` | Sharing & Device Connectivity | AirDrop, Continuity, CarPlay, Watch, and Find My services. | 65 |
-| `telemetry` | Ads, Diagnostics & Telemetry | DeviceCheck, ad privacy, analytics, diagnostics, and feedback services. | 105 |
-| `other` | Other Background Services | Wallet, business services, assets, and miscellaneous background daemons. | 195 |
+| ID             | Category                      | Turns off                                                                | ~MB |
+| -------------- | ----------------------------- | ------------------------------------------------------------------------ | --- |
+| `widgets`      | Widgets & Wallpaper           | Home and lock screen posters, widgets, and Live Activities.              | 675 |
+| `siri`         | Siri & Intelligence           | Siri, Apple Intelligence, speech, and on-device ML model services.       | 265 |
+| `search`       | Spotlight & Search            | On-device Spotlight and in-Settings search services.                     | 50  |
+| `icloud`       | iCloud & Apple Account        | iCloud sync, Apple Account, keychain, and backup services.               | 100 |
+| `store`        | App Store, Push & Media       | App Store, push notification, StoreKit, and media services.              | 80  |
+| `pim`          | Mail, Calendar & Contacts     | Mail, Calendar, Contacts, Reminders, and related sync services.          | 80  |
+| `web`          | Safari Sync & Web Services    | Safari sync, web push, privacy, and universal-link services.             | 50  |
+| `family`       | Family & Screen Time          | Family Sharing, Screen Time, and usage tracking.                         | 65  |
+| `health`       | Health, Home & Fitness        | HealthKit, HomeKit, and Fitness services.                                | 135 |
+| `photos`       | Photos & Media Analysis       | Photos library, photo analysis, and media analysis services.             | 60  |
+| `apps`         | News, Weather, Maps & Games   | News, Weather, Maps, Tips, and game services.                            | 90  |
+| `messaging`    | Messaging & FaceTime          | iMessage, FaceTime, call, and identity services.                         | 60  |
+| `connectivity` | Sharing & Device Connectivity | AirDrop, Continuity, CarPlay, Watch, and Find My services.               | 65  |
+| `telemetry`    | Ads, Diagnostics & Telemetry  | DeviceCheck, ad privacy, analytics, diagnostics, and feedback services.  | 105 |
+| `other`        | Other Background Services     | Wallet, business services, assets, and miscellaneous background daemons. | 195 |
 
 Memory figures are iOS 26.5 clean-boot medians and are not additive; see the
 [measurement method](docs/category-memory.md). Run `simslim profiles <id>` to

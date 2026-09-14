@@ -10,6 +10,7 @@ VERSION="${VERSION:-$(git -C "$ROOT_DIR" describe --tags --always --dirty)}"
 APP_VERSION="${VERSION#v}"
 APP_VERSION="${APP_VERSION%%-*}"
 BUILD_NUMBER="${BUILD_NUMBER:-1}"
+MACOS_DEPLOYMENT_TARGET="${MACOS_DEPLOYMENT_TARGET:-13.0}"
 
 if ! print -r -- "$APP_VERSION" | grep -Eq '^[0-9]+(\.[0-9]+){0,2}$'; then
   APP_VERSION="0.0.0"
@@ -200,7 +201,7 @@ for arch in "${SELECTED_ARCHS[@]}"; do
     -warnings-as-errors \
     -parse-as-library \
     -O \
-    -target "$arch-apple-macos14.0" \
+    -target "$arch-apple-macos$MACOS_DEPLOYMENT_TARGET" \
     -module-name SimSlimApp \
     -framework AppKit \
     -framework SwiftUI \
