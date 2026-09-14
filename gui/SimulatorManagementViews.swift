@@ -42,10 +42,12 @@ struct SlimmingRecommendationSheet: View {
           .background(Color.blue.opacity(0.1), in: RoundedRectangle(cornerRadius: 11))
 
         VStack(alignment: .leading, spacing: 4) {
-          Text("Clone Before Slimming?")
+          Text(tr("Clone Before Slimming?"))
             .font(.title2.bold())
           Text(
-            "We recommend making a clone before applying a service profile, so your current apps, data, settings, and simulator state remain available if anything unexpected happens."
+            tr(
+              "We recommend making a clone before applying a service profile, so your current apps, data, settings, and simulator state remain available if anything unexpected happens."
+            )
           )
           .font(.subheadline)
           .foregroundStyle(.secondary)
@@ -54,10 +56,14 @@ struct SlimmingRecommendationSheet: View {
       }
 
       VStack(alignment: .leading, spacing: 7) {
-        Label("Backup or general-purpose simulator", systemImage: "externaldrive.badge.timemachine")
-          .font(.subheadline.weight(.semibold))
+        Label(
+          tr("Backup or general-purpose simulator"), systemImage: "externaldrive.badge.timemachine"
+        )
+        .font(.subheadline.weight(.semibold))
         Text(
-          "The clone keeps the same apps, data, settings, and current service profile. SimSlim rebuilds simulator-local links and registrations so it is ready for separate use as a point-in-time backup or development simulator."
+          tr(
+            "The clone keeps the same apps, data, settings, and current service profile. SimSlim rebuilds simulator-local links and registrations so it is ready for separate use as a point-in-time backup or development simulator."
+          )
         )
         .font(.caption)
         .foregroundStyle(.secondary)
@@ -69,7 +75,9 @@ struct SlimmingRecommendationSheet: View {
 
       if devices.count > 1 {
         Label(
-          "To create backups for multiple selections, clone each simulator from its row menu or select one simulator at a time in the toolbar.",
+          tr(
+            "To create backups for multiple selections, clone each simulator from its row menu or select one simulator at a time in the toolbar."
+          ),
           systemImage: "info.circle"
         )
         .font(.caption)
@@ -78,16 +86,16 @@ struct SlimmingRecommendationSheet: View {
       }
 
       HStack {
-        Button("Cancel", role: .cancel) { dismiss() }
+        Button(tr("Cancel"), role: .cancel) { dismiss() }
           .keyboardShortcut(.cancelAction)
         Spacer()
         if let device = devices.first, devices.count == 1 {
-          Button("Clone Simulator") {
+          Button(tr("Clone Simulator")) {
             dismiss()
             onClone(device)
           }
         }
-        Button("Continue Without Clone") {
+        Button(tr("Continue Without Clone")) {
           dismiss()
           onContinue()
         }
@@ -158,9 +166,9 @@ struct SimulatorNameSheet: View {
         .fixedSize(horizontal: false, vertical: true)
 
       VStack(alignment: .leading, spacing: 7) {
-        Text("Simulator name")
+        Text(tr("Simulator name"))
           .font(.subheadline.weight(.semibold))
-        TextField("Name", text: $name)
+        TextField(tr("Name"), text: $name)
           .textFieldStyle(.roundedBorder)
           .focused($nameIsFocused)
           .onSubmit(submit)
@@ -178,7 +186,7 @@ struct SimulatorNameSheet: View {
 
       HStack {
         Spacer()
-        Button("Cancel", role: .cancel) { dismiss() }
+        Button(tr("Cancel"), role: .cancel) { dismiss() }
           .keyboardShortcut(.cancelAction)
         Button(actionTitle, action: submit)
           .buttonStyle(.borderedProminent)
@@ -205,8 +213,8 @@ enum SimulatorDestructiveAction {
 
   var verb: String {
     switch self {
-    case .erase: return "Erase"
-    case .delete: return "Delete"
+    case .erase: return tr("Erase")
+    case .delete: return tr("Delete")
     }
   }
 
@@ -221,10 +229,14 @@ enum SimulatorDestructiveAction {
     switch self {
     case .erase:
       return
-        "All apps, data, settings, and service-slimming overrides will be removed. The simulator devices remain available, reset to stock, and shutdown. This cannot be undone."
+        tr(
+          "All apps, data, settings, and service-slimming overrides will be removed. The simulator devices remain available, reset to stock, and shutdown. This cannot be undone."
+        )
     case .delete:
       return
-        "The selected simulator devices and all of their apps, data, and settings will be permanently removed. This cannot be undone."
+        tr(
+          "The selected simulator devices and all of their apps, data, and settings will be permanently removed. This cannot be undone."
+        )
     }
   }
 }
@@ -238,7 +250,7 @@ struct SimulatorDestructiveSheet: View {
   let onConfirm: () -> Void
 
   private var noun: String {
-    devices.count == 1 ? "Simulator" : "Simulators"
+    devices.count == 1 ? tr("Simulator") : tr("Simulators")
   }
 
   var body: some View {
@@ -251,7 +263,7 @@ struct SimulatorDestructiveSheet: View {
           .background(Color.red.opacity(0.1), in: RoundedRectangle(cornerRadius: 11))
 
         VStack(alignment: .leading, spacing: 3) {
-          Text("\(action.verb) \(devices.count) \(noun)?")
+          Text(tr("%d %@?", devices.count, noun))
             .font(.title2.bold())
           Text(action.warning)
             .font(.subheadline)
@@ -280,10 +292,10 @@ struct SimulatorDestructiveSheet: View {
                   .textSelection(.enabled)
               }
               Spacer()
-              Text(model.diskSizeText(for: device, loadingText: "Calculating…"))
+              Text(model.diskSizeText(for: device, loadingText: tr("Calculating…")))
                 .font(.caption.monospacedDigit())
                 .foregroundStyle(.secondary)
-              Text(device.isBooted ? "Booted" : "Shutdown")
+              Text(device.isBooted ? tr("Booted") : tr("Shutdown"))
                 .font(.caption)
                 .foregroundStyle(device.isBooted ? Color.blue : Color.secondary)
               Text(device.runtimeName)
@@ -303,14 +315,14 @@ struct SimulatorDestructiveSheet: View {
       .background(Color(nsColor: .controlBackgroundColor), in: RoundedRectangle(cornerRadius: 10))
 
       if devices.contains(where: \.isBooted) {
-        Label("Booted simulators will be shut down first.", systemImage: "power")
+        Label(tr("Booted simulators will be shut down first."), systemImage: "power")
           .font(.caption)
           .foregroundStyle(.secondary)
       }
 
       HStack {
         Spacer()
-        Button("Cancel", role: .cancel) { dismiss() }
+        Button(tr("Cancel"), role: .cancel) { dismiss() }
           .keyboardShortcut(.cancelAction)
         Button("\(action.verb) \(noun)", role: .destructive) {
           dismiss()
@@ -359,10 +371,18 @@ struct DiskCleanupConfirmationSheet: View {
           .background(Color.red.opacity(0.1), in: RoundedRectangle(cornerRadius: 11))
 
         VStack(alignment: .leading, spacing: 4) {
-          Text("Permanently Clean \(devices.count) Simulator\(devices.count == 1 ? "" : "s")?")
-            .font(.title2.bold())
           Text(
-            "Approximately \(estimatedSizeText) will be removed immediately, not moved to Trash. Generated data stays deleted; on-demand language data can be downloaded again by iOS."
+            tr(
+              "Permanently Clean %d Simulator%@?",
+              devices.count, devices.count == 1 ? "" : tr("s")
+            )
+          )
+          .font(.title2.bold())
+          Text(
+            tr(
+              "Approximately %@ will be removed immediately, not moved to Trash. Generated data stays deleted; on-demand language data can be downloaded again by iOS.",
+              estimatedSizeText
+            )
           )
           .font(.subheadline)
           .foregroundStyle(.secondary)
@@ -371,23 +391,27 @@ struct DiskCleanupConfirmationSheet: View {
       }
 
       VStack(alignment: .leading, spacing: 7) {
-        Label("Recommended: clone before cleaning", systemImage: "plus.square.on.square")
+        Label(tr("Recommended: clone before cleaning"), systemImage: "plus.square.on.square")
           .font(.subheadline.weight(.semibold))
         Text(
-          "A clone preserves the simulator’s current apps, data, settings, and service profile before this permanent cleanup. It can be kept as a backup or used as a normal simulator."
+          tr(
+            "A clone preserves the simulator’s current apps, data, settings, and service profile before this permanent cleanup. It can be kept as a backup or used as a normal simulator."
+          )
         )
         .font(.caption)
         .foregroundStyle(.secondary)
         .fixedSize(horizontal: false, vertical: true)
         if let device = devices.first, devices.count == 1 {
-          Button("Clone Simulator First") {
+          Button(tr("Clone Simulator First")) {
             dismiss()
             onClone(device)
           }
           .controlSize(.small)
         } else {
           Text(
-            "Clone each selected simulator individually from its row menu or the toolbar before continuing."
+            tr(
+              "Clone each selected simulator individually from its row menu or the toolbar before continuing."
+            )
           )
           .font(.caption)
           .foregroundStyle(.secondary)
@@ -402,7 +426,7 @@ struct DiskCleanupConfirmationSheet: View {
           HStack(spacing: 9) {
             Image(systemName: "checkmark.circle.fill")
               .foregroundStyle(.orange)
-            Text(category.name)
+            Text(tr(category.name))
               .font(.subheadline.weight(.medium))
             Spacer()
             Text(categorySizeText(category.id))
@@ -416,12 +440,14 @@ struct DiskCleanupConfirmationSheet: View {
 
       VStack(alignment: .leading, spacing: 6) {
         Label(
-          "Erase is not an undo for cleanup data",
+          tr("Erase is not an undo for cleanup data"),
           systemImage: "exclamationmark.arrow.triangle.2.circlepath"
         )
         .font(.subheadline.weight(.semibold))
         Text(
-          "Deleted caches, logs, and temporary history do not come back. Downloaded language data may return when a feature needs it. Erase is only a way to create a usable fresh simulator if cleanup causes trouble; it also removes every remaining app, setting, and user-data container."
+          tr(
+            "Deleted caches, logs, and temporary history do not come back. Downloaded language data may return when a feature needs it. Erase is only a way to create a usable fresh simulator if cleanup causes trouble; it also removes every remaining app, setting, and user-data container."
+          )
         )
         .font(.caption)
         .foregroundStyle(.secondary)
@@ -431,17 +457,17 @@ struct DiskCleanupConfirmationSheet: View {
       .background(Color.orange.opacity(0.1), in: RoundedRectangle(cornerRadius: 10))
 
       VStack(alignment: .leading, spacing: 6) {
-        Text("Type CLEAN to continue")
+        Text(tr("Type CLEAN to continue"))
           .font(.subheadline.weight(.semibold))
-        TextField("CLEAN", text: $confirmationText)
+        TextField(tr("CLEAN"), text: $confirmationText)
           .textFieldStyle(.roundedBorder)
       }
 
       HStack {
         Spacer()
-        Button("Cancel", role: .cancel) { dismiss() }
+        Button(tr("Cancel"), role: .cancel) { dismiss() }
           .keyboardShortcut(.cancelAction)
-        Button("Clean Disk Data", role: .destructive) {
+        Button(tr("Clean Disk Data"), role: .destructive) {
           let categoryIDs = Set(categories.map(\.id))
           dismiss()
           onConfirm(categoryIDs)

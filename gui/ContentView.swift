@@ -3,6 +3,7 @@ import SwiftUI
 
 struct ContentView: View {
   @EnvironmentObject private var model: AppModel
+  @EnvironmentObject private var localization: Localization
   @State private var searchText = ""
   @State private var searchIsExpanded = false
   @State private var managementSheet: SimulatorManagementSheet?
@@ -61,30 +62,30 @@ struct ContentView: View {
           Button {
             managementSheet = .slimmingRecommendation(model.selectedDevices)
           } label: {
-            ToolbarActionLabel("Slim", systemImage: "minus.circle")
+            ToolbarActionLabel(tr("Slim"), systemImage: "minus.circle")
           }
           .disabled(model.selectionCount == 0 || !model.canStartBatchOnSelection)
-          .help("Apply the selected service profile")
+          .help(tr("Apply the selected service profile"))
         }
 
         ToolbarItem(placement: .automatic) {
           Button {
             Task { await model.restoreSelection() }
           } label: {
-            ToolbarActionLabel("Unslim", systemImage: "plus.circle")
+            ToolbarActionLabel(tr("Unslim"), systemImage: "plus.circle")
           }
           .disabled(model.selectionCount == 0 || !model.canStartBatchOnSelection)
-          .help("Restore all SimSlim-managed services")
+          .help(tr("Restore all SimSlim-managed services"))
         }
       } else {
         ToolbarItem(placement: .automatic) {
           Button(role: .destructive) {
             managementSheet = .diskCleanup(model.selectedDevices, selectedCleanableDiskCategories)
           } label: {
-            ToolbarActionLabel("Clean Disk", systemImage: "externaldrive.badge.xmark")
+            ToolbarActionLabel(tr("Clean Disk"), systemImage: "externaldrive.badge.xmark")
           }
           .disabled(!model.canCleanDiskSelection || !model.canStartBatchOnSelection)
-          .help("Permanently clean the selected disk categories")
+          .help(tr("Permanently clean the selected disk categories"))
         }
       }
 
@@ -95,26 +96,26 @@ struct ContentView: View {
           guard let device = singleSelectedDevice else { return }
           managementSheet = .clone(device)
         } label: {
-          ToolbarActionLabel("Clone", systemImage: "plus.square.on.square")
+          ToolbarActionLabel(tr("Clone"), systemImage: "plus.square.on.square")
         }
         .disabled(singleSelectedDevice == nil || model.isSelectionBusy)
-        .help("Clone for backup or general-purpose use")
+        .help(tr("Clone for backup or general-purpose use"))
 
         Button(role: .destructive) {
           managementSheet = .erase(model.selectedDevices)
         } label: {
-          ToolbarActionLabel("Erase", systemImage: "eraser")
+          ToolbarActionLabel(tr("Erase"), systemImage: "eraser")
         }
         .disabled(model.selectionCount == 0 || !model.canStartBatchOnSelection)
-        .help("Erase Simulator")
+        .help(tr("Erase Simulator"))
 
         Button(role: .destructive) {
           managementSheet = .delete(model.selectedDevices)
         } label: {
-          ToolbarActionLabel("Delete", systemImage: "trash")
+          ToolbarActionLabel(tr("Delete"), systemImage: "trash")
         }
         .disabled(model.selectionCount == 0 || !model.canStartBatchOnSelection)
-        .help("Delete Simulator")
+        .help(tr("Delete Simulator"))
       }
 
       ToolbarItem { Spacer() }
@@ -124,34 +125,34 @@ struct ContentView: View {
           guard let device = singleSelectedDevice else { return }
           Task { await model.bootSimulator(device) }
         } label: {
-          ToolbarActionLabel("Boot", systemImage: "play.fill")
+          ToolbarActionLabel(tr("Boot"), systemImage: "play.fill")
         }
         .disabled(
           singleSelectedDevice == nil || singleSelectedDevice?.isBooted == true
             || model.isSelectionBusy
         )
-        .help("Boot Simulator")
+        .help(tr("Boot Simulator"))
 
         Button {
           guard let device = singleSelectedDevice else { return }
           Task { await model.shutdownSimulator(device) }
         } label: {
-          ToolbarActionLabel("Kill", systemImage: "stop.fill")
+          ToolbarActionLabel(tr("Kill"), systemImage: "stop.fill")
         }
         .disabled(
           singleSelectedDevice == nil || singleSelectedDevice?.isBooted == false
             || model.isSelectionBusy
         )
-        .help("Shut Down Simulator")
+        .help(tr("Shut Down Simulator"))
 
         Button {
           guard let device = singleSelectedDevice else { return }
           managementSheet = .rename(device)
         } label: {
-          ToolbarActionLabel("Rename", systemImage: "pencil")
+          ToolbarActionLabel(tr("Rename"), systemImage: "pencil")
         }
         .disabled(singleSelectedDevice == nil || model.isSelectionBusy)
-        .help("Rename Simulator")
+        .help(tr("Rename Simulator"))
       }
 
       ToolbarItem { Spacer() }
@@ -160,18 +161,18 @@ struct ContentView: View {
         Button {
           Task { await model.refresh() }
         } label: {
-          ToolbarActionLabel("Refresh", systemImage: "arrow.clockwise")
+          ToolbarActionLabel(tr("Refresh"), systemImage: "arrow.clockwise")
         }
         .disabled(model.isBusy)
-        .help("Refresh simulator status")
+        .help(tr("Refresh simulator status"))
 
         Menu {
-          Button("Select Visible") { model.select(filteredUDIDs) }
+          Button(tr("Select Visible")) { model.select(filteredUDIDs) }
             .disabled(filteredDevices.isEmpty)
-          Button("Clear Selection") { model.clearSelection() }
+          Button(tr("Clear Selection")) { model.clearSelection() }
             .disabled(model.selectionCount == 0)
         } label: {
-          ToolbarActionLabel("Selection", systemImage: "checklist")
+          ToolbarActionLabel(tr("Selection"), systemImage: "checklist")
         }
         .disabled(model.isBusy)
       }
@@ -181,9 +182,13 @@ struct ContentView: View {
       ToolbarItem(placement: .automatic) {
         CollapsibleToolbarSearch(
           text: $searchText,
-          prompt: "Find a simulator",
+          prompt: tr("Find a simulator"),
           isExpanded: $searchIsExpanded
         )
+      }
+
+      ToolbarItem(placement: .automatic) {
+        LanguageMenu()
       }
     }
     .sheet(item: $managementSheet) { sheet in
@@ -191,10 +196,16 @@ struct ContentView: View {
     }
     .alert(item: $model.presentedError) { error in
       Alert(
-        title: Text("SimSlim couldn’t finish"),
+        title: Text(tr("SimSlim couldn’t finish")),
         message: Text(error.message),
-        dismissButton: .default(Text("OK"))
+        dismissButton: .default(Text(tr("OK")))
       )
+    }
+    .alert(tr("Language Changed"), isPresented: $localization.showsRestartPrompt) {
+      Button(tr("Restart Now")) { localization.relaunch() }
+      Button(tr("Later"), role: .cancel) {}
+    } message: {
+      Text(tr("SimSlim applies the new language after it restarts."))
     }
     .task(id: automaticDiskAnalysisID) {
       guard slimmingMode == .disk, model.selectionCount > 0 else { return }
@@ -205,7 +216,7 @@ struct ContentView: View {
   private var header: some View {
     HStack(spacing: 18) {
       VStack(alignment: .leading, spacing: 4) {
-        Text("Installed Simulators")
+        Text(tr("Installed Simulators"))
           .font(.system(size: 27, weight: .bold, design: .rounded))
         Text(lastUpdatedText)
           .font(.subheadline)
@@ -214,9 +225,9 @@ struct ContentView: View {
 
       Spacer()
 
-      MetricPill(value: "\(model.devices.count)", label: "Installed", color: .blue)
-      MetricPill(value: "\(model.bootedCount)", label: "Booted", color: .orange)
-      MetricPill(value: "\(model.selectionCount)", label: "Selected", color: .purple)
+      MetricPill(value: "\(model.devices.count)", label: tr("Installed"), color: .blue)
+      MetricPill(value: "\(model.bootedCount)", label: tr("Booted"), color: .orange)
+      MetricPill(value: "\(model.selectionCount)", label: tr("Selected"), color: .purple)
     }
     .padding(.horizontal, 20)
     .padding(.vertical, 15)
@@ -238,29 +249,29 @@ struct ContentView: View {
         }
         .buttonStyle(.plain)
         .disabled(filteredDevices.isEmpty || model.isBusy)
-        .help("Select or deselect all visible simulators")
+        .help(tr("Select or deselect all visible simulators"))
 
         if model.selectionCount == 0 {
           Text(
             slimmingMode == .memory
-              ? "Select simulators to change their service profile"
-              : "Select simulators to review reclaimable disk data"
+              ? tr("Select simulators to change their service profile")
+              : tr("Select simulators to review reclaimable disk data")
           )
           .foregroundStyle(.secondary)
         } else {
-          Text("\(model.selectionCount) selected")
+          Text(tr("%d selected", model.selectionCount))
             .fontWeight(.semibold)
           if slimmingMode == .memory {
-            Text("· profile will disable up to \(model.disabledDaemonCount) services")
+            Text(tr("· profile will disable up to %d services", model.disabledDaemonCount))
               .foregroundStyle(.secondary)
           } else if model.isAnalyzingDisk {
-            Text("· analyzing disk usage…")
+            Text(tr("· analyzing disk usage…"))
               .foregroundStyle(.secondary)
           } else if model.diskAnalysisCoversSelection {
-            Text("· \(model.selectedDiskCleanupSizeText()) selected for cleanup")
+            Text(tr("· %@ selected for cleanup", model.selectedDiskCleanupSizeText()))
               .foregroundStyle(.orange)
           } else {
-            Text("· disk analysis pending")
+            Text(tr("· disk analysis pending"))
               .foregroundStyle(.secondary)
           }
         }
@@ -278,7 +289,7 @@ struct ContentView: View {
               .lineLimit(1)
               .truncationMode(.tail)
             Spacer()
-            Text("\(progress.completed) of \(progress.total)")
+            Text(tr("%d of %d", progress.completed, progress.total))
               .monospacedDigit()
           }
           .font(.caption)
@@ -303,18 +314,18 @@ struct ContentView: View {
           if model.isRefreshing && model.devices.isEmpty {
             VStack(spacing: 12) {
               ProgressView()
-              Text("Loading simulators…")
+              Text(tr("Loading simulators…"))
                 .foregroundStyle(.secondary)
             }
             .frame(width: geometry.size.width, height: geometry.size.height)
           } else if filteredDevices.isEmpty {
             ContentUnavailableView(
-              searchText.isEmpty ? "No Simulators" : "No Matches",
+              searchText.isEmpty ? tr("No Simulators") : tr("No Matches"),
               systemImage: "rectangle.slash",
               description: Text(
                 searchText.isEmpty
-                  ? "Install an iOS, tvOS, watchOS, or visionOS Simulator runtime in Xcode."
-                  : "Try a different name, UDID, or OS version.")
+                  ? tr("Install an iOS, tvOS, watchOS, or visionOS Simulator runtime in Xcode.")
+                  : tr("Try a different name, UDID, or OS version."))
             )
             .frame(width: geometry.size.width, height: geometry.size.height)
           } else {
@@ -342,13 +353,13 @@ struct ContentView: View {
   private var tableHeader: some View {
     HStack(spacing: 12) {
       Color.clear.frame(width: 30, height: 1)
-      Text("SIMULATOR")
+      Text(tr("SIMULATOR"))
         .frame(minWidth: 255, maxWidth: .infinity, alignment: .leading)
-      Text("RUNTIME").frame(width: 74, alignment: .leading)
-      Text("BOOT").frame(width: 86, alignment: .leading)
-      Text("SERVICES").frame(width: 150, alignment: .leading)
-      Text("DISK SIZE").frame(width: 105, alignment: .leading)
-      Text("RAM USAGE").frame(width: 82, alignment: .leading)
+      Text(tr("RUNTIME")).frame(width: 74, alignment: .leading)
+      Text(tr("BOOT")).frame(width: 86, alignment: .leading)
+      Text(tr("SERVICES")).frame(width: 150, alignment: .leading)
+      Text(tr("DISK SIZE")).frame(width: 105, alignment: .leading)
+      Text(tr("RAM USAGE")).frame(width: 82, alignment: .leading)
       Color.clear.frame(width: 28, height: 1)
     }
     .font(.system(size: 10, weight: .semibold))
@@ -369,8 +380,8 @@ struct ContentView: View {
   }
 
   private var lastUpdatedText: String {
-    guard let date = model.lastUpdated else { return "Loading simulator status…" }
-    return "Updated \(date.formatted(date: .omitted, time: .shortened))"
+    guard let date = model.lastUpdated else { return tr("Loading simulator status…") }
+    return tr("Updated %@", date.formatted(date: .omitted, time: .shortened))
   }
 
   @ViewBuilder
@@ -378,12 +389,13 @@ struct ContentView: View {
     switch sheet {
     case .clone(let device):
       SimulatorNameSheet(
-        title: "Clone Simulator",
-        actionTitle: "Clone Simulator",
+        title: tr("Clone Simulator"),
+        actionTitle: tr("Clone Simulator"),
         systemImage: "plus.square.on.square",
-        explanation:
-          "The clone copies the source simulator’s apps, data, settings, and current SimSlim service profile. SimSlim rebases simulator-local links, rebuilds generated app registrations, and audits the running clone for open paths into the source. SimSlim may briefly boot a shutdown source to read its profile, or briefly shut down a booted source to make the copy. The source returns to its original boot state, and the clone finishes shutdown.",
-        initialName: "\(device.name) Copy",
+        explanation: tr(
+          "The clone copies the source simulator’s apps, data, settings, and current SimSlim service profile. SimSlim rebases simulator-local links, rebuilds generated app registrations, and audits the running clone for open paths into the source. SimSlim may briefly boot a shutdown source to read its profile, or briefly shut down a booted source to make the copy. The source returns to its original boot state, and the clone finishes shutdown."
+        ),
+        initialName: tr("%@ Copy", device.name),
         device: device
       ) { name in
         Task { await model.cloneSimulator(device, named: name) }
@@ -398,11 +410,12 @@ struct ContentView: View {
 
     case .rename(let device):
       SimulatorNameSheet(
-        title: "Rename Simulator",
-        actionTitle: "Rename Simulator",
+        title: tr("Rename Simulator"),
+        actionTitle: tr("Rename Simulator"),
         systemImage: "pencil",
-        explanation:
-          "Renaming changes only the simulator’s display name. Its apps, data, runtime, and service profile stay the same.",
+        explanation: tr(
+          "Renaming changes only the simulator’s display name. Its apps, data, runtime, and service profile stay the same."
+        ),
         initialName: device.name,
         device: device
       ) { name in
@@ -475,11 +488,11 @@ private struct CollapsibleToolbarSearch: View {
         }
       } label: {
         ToolbarActionLabel(
-          "Search",
+          tr("Search"),
           systemImage: text.isEmpty ? "magnifyingglass" : "magnifyingglass.circle.fill"
         )
       }
-      .help(text.isEmpty ? prompt : "\(prompt) — filter active")
+      .help(text.isEmpty ? prompt : tr("%@ — filter active", prompt))
       .accessibilityLabel(text.isEmpty ? prompt : "\(prompt), filter active")
     }
   }
@@ -509,7 +522,7 @@ private struct CollapsibleToolbarSearch: View {
             .foregroundStyle(.secondary)
         }
         .buttonStyle(.plain)
-        .help("Clear search")
+        .help(tr("Clear search"))
       }
 
       Button {
@@ -519,8 +532,8 @@ private struct CollapsibleToolbarSearch: View {
           .foregroundStyle(.secondary)
       }
       .buttonStyle(.plain)
-      .help("Collapse search")
-      .accessibilityLabel("Collapse search")
+      .help(tr("Collapse search"))
+      .accessibilityLabel(tr("Collapse search"))
     }
     .onExitCommand(perform: collapse)
   }
@@ -649,7 +662,7 @@ private struct ProfileSidebar: View {
         VStack(alignment: .leading, spacing: 2) {
           Text("SimSlim")
             .font(.title2.bold())
-          Text(mode == .memory ? "Service slimming · reversible" : "Disk analysis & cleanup")
+          Text(mode == .memory ? tr("Service slimming · reversible") : tr("Disk analysis & cleanup"))
             .font(.caption)
             .foregroundStyle(.secondary)
         }
@@ -657,9 +670,9 @@ private struct ProfileSidebar: View {
       }
       .padding(18)
 
-      Picker("Slimming mode", selection: $mode) {
+      Picker(tr("Slimming mode"), selection: $mode) {
         ForEach(SlimmingMode.allCases) { option in
-          Text(option.rawValue).tag(option)
+          Text(option.localizedName).tag(option)
         }
       }
       .pickerStyle(.segmented)
@@ -730,17 +743,19 @@ private struct ProfileSidebar: View {
 
       VStack(alignment: .leading, spacing: 5) {
         HStack {
-          Text("Services to keep")
+          Text(tr("Services to keep"))
             .font(.headline)
           Spacer()
-          Button("Full Slim") { model.resetProfile() }
+          Button(tr("Full Slim")) { model.resetProfile() }
             .buttonStyle(.plain)
             .foregroundStyle(.tint)
             .disabled(
               (model.keptCategoryIDs.isEmpty && model.keptServiceLabels.isEmpty) || model.isBusy)
         }
         Text(
-          "Sorted by estimated idle memory use. Enable categories your tests need; estimates vary and are not additive."
+          tr(
+            "Sorted by estimated idle memory use. Enable categories your tests need; estimates vary and are not additive."
+          )
         )
         .font(.caption)
         .foregroundStyle(.secondary)
@@ -760,7 +775,7 @@ private struct ProfileSidebar: View {
         if !serviceSearchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
           && filteredMemoryCategories.isEmpty
         {
-          Text("No services match \u{201c}\(serviceSearchText)\u{201d}")
+          Text(tr("No services match \u{201c}%@\u{201d}", serviceSearchText))
             .font(.subheadline)
             .foregroundStyle(.secondary)
             .frame(maxWidth: .infinity, minHeight: 72)
@@ -768,22 +783,28 @@ private struct ProfileSidebar: View {
       }
       .frame(maxWidth: .infinity, alignment: .leading)
 
-      Toggle("Preserve current boot state", isOn: $model.preserveBootState)
+      Toggle(tr("Preserve current boot state"), isOn: $model.preserveBootState)
         .font(.subheadline.weight(.medium))
         .disabled(model.isBusy)
       Text(
-        "A simulator that starts shutdown will return to shutdown after its service profile is changed."
+        tr(
+          "A simulator that starts shutdown will return to shutdown after its service profile is changed."
+        )
       )
       .font(.caption)
       .foregroundStyle(.secondary)
       .fixedSize(horizontal: false, vertical: true)
 
       VStack(alignment: .leading, spacing: 7) {
-        Label("Up to \(model.disabledDaemonCount) services will be disabled", systemImage: "circle")
+        Label(
+          tr("Up to %d services will be disabled", model.disabledDaemonCount),
+          systemImage: "circle")
           .font(.subheadline.weight(.semibold))
           .foregroundStyle(.green)
         Text(
-          "Core workflow and deadlock-prone daemons are never disabled. HomeKit’s homed stays enabled on watchOS, and the asset service mobileassetd on visionOS."
+          tr(
+            "Core workflow and deadlock-prone daemons are never disabled. HomeKit’s homed stays enabled on watchOS, and the asset service mobileassetd on visionOS."
+          )
         )
         .font(.caption)
         .foregroundStyle(.secondary)
@@ -798,14 +819,14 @@ private struct ProfileSidebar: View {
     VStack(alignment: .leading, spacing: 14) {
       VStack(alignment: .leading, spacing: 5) {
         HStack {
-          Text("Cleanup")
+          Text(tr("Cleanup"))
             .font(.headline)
           Spacer()
           Text(model.selectedDiskCleanupSizeText())
             .font(.caption.monospacedDigit().weight(.semibold))
             .foregroundStyle(model.diskAnalysisCoversSelection ? Color.orange : Color.secondary)
         }
-        Text("Updates automatically when your selection changes. Analysis is read-only.")
+        Text(tr("Updates automatically when your selection changes. Analysis is read-only."))
           .font(.caption)
           .foregroundStyle(.secondary)
           .fixedSize(horizontal: false, vertical: true)
@@ -813,12 +834,12 @@ private struct ProfileSidebar: View {
         Button {
           Task { await model.analyzeDiskSelection() }
         } label: {
-          Label("Re-analyze Selected", systemImage: "arrow.clockwise")
+          Label(tr("Re-analyze Selected"), systemImage: "arrow.clockwise")
         }
         .buttonStyle(.borderless)
         .controlSize(.small)
         .disabled(model.selectionCount == 0 || !model.canStartBatchOnSelection)
-        .help("Refresh disk usage for the selected simulators")
+        .help(tr("Refresh disk usage for the selected simulators"))
       }
 
       VStack(alignment: .leading, spacing: 8) {
@@ -829,9 +850,9 @@ private struct ProfileSidebar: View {
 
       if model.diskAnalysisCoversSelection {
         VStack(alignment: .leading, spacing: 8) {
-          Text("Storage breakdown")
+          Text(tr("Storage breakdown"))
             .font(.headline)
-          Text("Read-only sizes. These files are never selected for cleanup.")
+          Text(tr("Read-only sizes. These files are never selected for cleanup."))
             .font(.caption)
             .foregroundStyle(.secondary)
 
@@ -844,17 +865,19 @@ private struct ProfileSidebar: View {
         }
       }
 
-      Toggle("Reopen previously booted simulators", isOn: $model.preserveBootState)
+      Toggle(tr("Reopen previously booted simulators"), isOn: $model.preserveBootState)
         .font(.subheadline.weight(.medium))
         .disabled(model.isBusy)
 
       VStack(alignment: .leading, spacing: 7) {
         Text(
-          "Required Siri assets aren’t offered for deletion — iOS restores them automatically on launch."
+          tr(
+            "Required Siri assets aren’t offered for deletion — iOS restores them automatically on launch."
+          )
         )
         .font(.caption.weight(.semibold))
         .foregroundStyle(.blue)
-        Text("Built-in apps and core OS resources are never modified.")
+        Text(tr("Built-in apps and core OS resources are never modified."))
           .font(.caption)
           .foregroundStyle(.secondary)
           .fixedSize(horizontal: false, vertical: true)
@@ -866,12 +889,12 @@ private struct ProfileSidebar: View {
 
   private var stateLegend: some View {
     VStack(alignment: .leading, spacing: 8) {
-      Text("Service state")
+      Text(tr("Service state"))
         .font(.headline)
       HStack(spacing: 13) {
-        LegendItem(icon: "circle.fill", label: "Stock")
-        LegendItem(icon: "circle.lefthalf.filled", label: "Partial")
-        LegendItem(icon: "circle", label: "Slim")
+        LegendItem(icon: "circle.fill", label: tr("Stock"))
+        LegendItem(icon: "circle.lefthalf.filled", label: tr("Partial"))
+        LegendItem(icon: "circle", label: tr("Slim"))
       }
       .foregroundStyle(.secondary)
     }
@@ -886,9 +909,9 @@ private struct SidebarServiceSearch: View {
       Image(systemName: "magnifyingglass")
         .foregroundStyle(.secondary)
 
-      TextField("Find a service", text: $text)
+      TextField(tr("Find a service"), text: $text)
         .textFieldStyle(.plain)
-        .accessibilityLabel("Find a service")
+        .accessibilityLabel(tr("Find a service"))
 
       if !text.isEmpty {
         Button {
@@ -898,7 +921,7 @@ private struct SidebarServiceSearch: View {
             .foregroundStyle(.secondary)
         }
         .buttonStyle(.plain)
-        .help("Clear service search")
+        .help(tr("Clear service search"))
       }
     }
     .padding(.horizontal, 9)
@@ -930,10 +953,10 @@ private struct DiskCleanupCategoryToggle: View {
     HStack(alignment: .top, spacing: 12) {
       VStack(alignment: .leading, spacing: 6) {
         VStack(alignment: .leading, spacing: 4) {
-          Text(category.name)
+          Text(tr(category.name))
             .font(.subheadline.weight(.medium))
           if category.risk != "Lower risk" {
-            Text(category.risk.uppercased())
+            Text(tr(category.risk).uppercased())
               .font(.system(size: 8, weight: .bold))
               .lineLimit(1)
               .fixedSize(horizontal: true, vertical: false)
@@ -948,18 +971,18 @@ private struct DiskCleanupCategoryToggle: View {
           .font(.caption.weight(.semibold))
           .foregroundStyle(accentColor)
 
-        (Text("Impact: ").fontWeight(.semibold) + Text(category.downside))
+        (Text(tr("Impact: ")).fontWeight(.semibold) + Text(tr(category.downside)))
           .font(.caption)
           .foregroundStyle(.secondary)
           .fixedSize(horizontal: false, vertical: true)
 
-        (Text("Afterward: ").fontWeight(.semibold) + Text(category.recovery))
+        (Text(tr("Afterward: ")).fontWeight(.semibold) + Text(tr(category.recovery)))
           .font(.caption)
           .foregroundStyle(.secondary)
           .fixedSize(horizontal: false, vertical: true)
 
         if !category.canClean {
-          Text("Unable to delete — iOS restores automatically on launch.")
+          Text(tr("Unable to delete — iOS restores automatically on launch."))
             .font(.caption.weight(.semibold))
             .foregroundStyle(.blue)
         }
@@ -967,7 +990,7 @@ private struct DiskCleanupCategoryToggle: View {
       .frame(maxWidth: .infinity, alignment: .leading)
 
       if category.canClean {
-        Toggle("Remove \(category.name)", isOn: isSelected)
+        Toggle(tr("Remove %@", category.name), isOn: isSelected)
           .labelsHidden()
           .toggleStyle(.switch)
           .disabled(model.isBusy)
@@ -976,14 +999,14 @@ private struct DiskCleanupCategoryToggle: View {
         Image(systemName: "lock.fill")
           .foregroundStyle(.secondary)
           .frame(width: 38, height: 24)
-          .accessibilityLabel("Deletion unavailable")
+          .accessibilityLabel(tr("Deletion unavailable"))
           .padding(.top, 1)
       }
     }
     .padding(10)
     .frame(maxWidth: .infinity, alignment: .leading)
     .background(Color(nsColor: .controlBackgroundColor), in: RoundedRectangle(cornerRadius: 9))
-    .help(category.recovery)
+    .help(tr(category.recovery))
   }
 }
 
@@ -998,9 +1021,9 @@ private struct DiskStorageRow: View {
         .frame(width: 17)
 
       VStack(alignment: .leading, spacing: 2) {
-        Text(storage.name)
+        Text(tr(storage.name))
           .font(.subheadline.weight(.medium))
-        Text(storage.description)
+        Text(tr(storage.description))
           .font(.caption)
           .foregroundStyle(.secondary)
           .fixedSize(horizontal: false, vertical: true)
@@ -1092,7 +1115,7 @@ private struct CategoryToggle: View {
               .foregroundStyle(.secondary)
               .frame(width: 9)
 
-            Text(category.name)
+            Text(tr(category.name))
               .font(.subheadline.weight(.medium))
               .fixedSize(horizontal: false, vertical: true)
 
@@ -1105,16 +1128,16 @@ private struct CategoryToggle: View {
           }
         }
         .buttonStyle(.plain)
-        .help(showsServices ? "Hide individual services" : "Show individual services")
+        .help(showsServices ? tr("Hide individual services") : tr("Show individual services"))
 
         Spacer(minLength: 4)
 
-        Toggle("Keep \(category.name) enabled", isOn: isKeptEnabled)
+        Toggle(tr("Keep %@ enabled", category.name), isOn: isKeptEnabled)
           .labelsHidden()
           .toggleStyle(.switch)
           .disabled(model.isBusy)
           .padding(.top, 1)
-          .help("Keep all controllable services in \(category.name) enabled")
+          .help(tr("Keep all controllable services in %@ enabled", category.name))
       }
 
       Label(category.approximateMemoryText, systemImage: "memorychip")
@@ -1125,7 +1148,7 @@ private struct CategoryToggle: View {
         .background(Color.blue.opacity(0.1), in: Capsule())
         .help(category.approximateMemoryText)
 
-      (Text("When disabled: ").fontWeight(.semibold) + Text(category.downside))
+      (Text(tr("When disabled: ")).fontWeight(.semibold) + Text(tr(category.downside)))
         .font(.caption)
         .foregroundStyle(.secondary)
         .fixedSize(horizontal: false, vertical: true)
@@ -1183,7 +1206,7 @@ private struct ServiceToggle: View {
 
       Spacer(minLength: 4)
 
-      Toggle("Keep \(label) enabled", isOn: isKeptEnabled)
+      Toggle(tr("Keep %@ enabled", label), isOn: isKeptEnabled)
         .labelsHidden()
         .toggleStyle(.switch)
         .controlSize(.mini)
@@ -1217,7 +1240,7 @@ private struct AlwaysEnabledServiceRow: View {
 
       Spacer(minLength: 4)
 
-      Text("Always on")
+      Text(tr("Always on"))
         .font(.caption2.weight(.semibold))
         .foregroundStyle(.blue)
         .padding(.horizontal, 6)
@@ -1282,8 +1305,8 @@ private struct SimulatorRow: View {
               }
               .buttonStyle(.plain)
               .foregroundStyle(.secondary)
-              .help("Copy UDID")
-              .accessibilityLabel("Copy UDID for \(device.name)")
+              .help(tr("Copy UDID"))
+              .accessibilityLabel(tr("Copy UDID for %@", device.name))
             }
           }
         }
@@ -1307,7 +1330,7 @@ private struct SimulatorRow: View {
           .font(.subheadline.monospacedDigit())
           .foregroundStyle(model.diskSizes[device.udid] == nil ? .tertiary : .secondary)
           .frame(width: 105, alignment: .leading)
-          .help("Current allocated size of this simulator on disk")
+          .help(tr("Current allocated size of this simulator on disk"))
 
         Group {
           if let measurement = model.measurements[device.udid] {
@@ -1321,108 +1344,109 @@ private struct SimulatorRow: View {
         .frame(width: 82, alignment: .leading)
 
         Menu {
-          Section("Power") {
+          Section(tr("Power")) {
             if device.isBooted {
               Button {
                 Task { await model.shutdownSimulator(device) }
               } label: {
-                Label("Shut Down Simulator", systemImage: "stop.fill")
+                Label(tr("Shut Down Simulator"), systemImage: "stop.fill")
               }
             } else {
               Button {
                 Task { await model.bootSimulator(device) }
               } label: {
-                Label("Boot Simulator", systemImage: "play.fill")
+                Label(tr("Boot Simulator"), systemImage: "play.fill")
               }
             }
           }
 
-          Section("Service Profile") {
+          Section(tr("Service Profile")) {
             Button {
               managementSheet = .slimmingRecommendation([device])
             } label: {
-              Label("Slim Simulator", systemImage: "minus.circle")
+              Label(tr("Slim Simulator"), systemImage: "minus.circle")
             }
             .disabled(model.isBatchRunning)
 
             Button {
               Task { await model.restoreOriginalServices(for: device) }
             } label: {
-              Label("Unslim Simulator", systemImage: "plus.circle")
+              Label(tr("Unslim Simulator"), systemImage: "plus.circle")
             }
             .disabled(model.isBatchRunning)
           }
 
-          Section("Disk Space") {
+          Section(tr("Disk Space")) {
             Button(role: .destructive) {
               managementSheet = .diskCleanup([device], diskCleanupCategories)
             } label: {
-              Label("Clean Disk Data", systemImage: "externaldrive.badge.xmark")
+              Label(tr("Clean Disk Data"), systemImage: "externaldrive.badge.xmark")
             }
             .disabled(!model.canCleanDisk([device]) || model.isBatchRunning)
           }
 
-          Section("Simulator") {
+          Section(tr("Simulator")) {
             Button {
               managementSheet = .clone(device)
             } label: {
-              Label("Clone Simulator", systemImage: "plus.square.on.square")
+              Label(tr("Clone Simulator"), systemImage: "plus.square.on.square")
             }
 
             Button {
               managementSheet = .rename(device)
             } label: {
-              Label("Rename Simulator", systemImage: "pencil")
+              Label(tr("Rename Simulator"), systemImage: "pencil")
             }
           }
 
-          Section("Finder") {
+          Section(tr("Finder")) {
             Button {
               openInFinder(simulatorDirectoryURL)
             } label: {
-              Label("Show Simulator in Finder", systemImage: "folder")
+              Label(tr("Show Simulator in Finder"), systemImage: "folder")
             }
 
             Button {
               openInFinder(appDataContainersURL)
             } label: {
-              Label("Show App Data Containers in Finder", systemImage: "folder.badge.gearshape")
+              Label(
+                tr("Show App Data Containers in Finder"), systemImage: "folder.badge.gearshape")
             }
           }
 
-          Section("Status") {
+          Section(tr("Status")) {
             Button {
               Task { await model.refresh() }
             } label: {
-              Label("Refresh Simulator Status", systemImage: "arrow.clockwise")
+              Label(tr("Refresh Simulator Status"), systemImage: "arrow.clockwise")
             }
 
             Button {
               Task { await model.measure(device) }
             } label: {
-              Label("Refresh RAM", systemImage: "memorychip")
+              Label(tr("Refresh RAM"), systemImage: "memorychip")
             }
             .disabled(!device.isBooted)
           }
 
-          Section("Selection") {
-            Button(isSelected ? "Deselect Simulator" : "Select Simulator") {
+          Section(tr("Selection")) {
+            Button(isSelected ? tr("Deselect Simulator") : tr("Select Simulator")) {
               model.toggleSelection(device.udid)
             }
           }
 
-          Section("Destructive Actions") {
+          Section(tr("Destructive Actions")) {
             Button(role: .destructive) {
               managementSheet = .erase([device])
             } label: {
-              Label("Erase Simulator", systemImage: "eraser")
+              Label(tr("Erase Simulator"), systemImage: "eraser")
             }
             .disabled(model.isBatchRunning)
 
             Button(role: .destructive) {
               managementSheet = .delete([device])
             } label: {
-              Label("Delete Simulator", systemImage: "trash")
+              Label(tr("Delete Simulator"), systemImage: "trash")
             }
             .disabled(model.isBatchRunning)
           }
@@ -1440,9 +1464,9 @@ private struct SimulatorRow: View {
         HStack(spacing: 8) {
           ProgressView()
             .controlSize(.small)
-          Text(operation)
+          Text(tr(operation))
           Spacer()
-          Text("Booting and rebooting can take a few minutes")
+          Text(tr("Booting and rebooting can take a few minutes"))
             .foregroundStyle(.tertiary)
         }
         .font(.caption)
@@ -1475,14 +1499,12 @@ private struct SimulatorRow: View {
       isDirectory.boolValue
     else {
       model.presentedError = PresentedError(
-        message: "The directory for \(device.name) does not exist at \(url.path)."
-      )
+        message: tr("The directory for %@ does not exist at %@.", device.name, url.path))
       return
     }
     guard NSWorkspace.shared.open(url) else {
       model.presentedError = PresentedError(
-        message: "Finder could not open \(url.path)."
-      )
+        message: tr("Finder could not open %@.", url.path))
       return
     }
   }
@@ -1496,7 +1518,7 @@ private struct BootStateView: View {
       Circle()
         .fill(isBooted ? Color.green : Color.gray)
         .frame(width: 7, height: 7)
-      Text(isBooted ? "Booted" : "Shutdown")
+      Text(isBooted ? tr("Booted") : tr("Shutdown"))
         .font(.subheadline)
         .foregroundStyle(isBooted ? Color.primary : Color.secondary)
     }
@@ -1521,11 +1543,11 @@ private struct ServiceStateView: View {
           .frame(width: 17)
       }
       VStack(alignment: .leading, spacing: 1) {
-        Text(operation == nil ? state.title : "Changing…")
+        Text(operation == nil ? state.title : tr("Changing…"))
           .font(.subheadline.weight(.medium))
           .lineLimit(1)
         if isCached && operation == nil {
-          Text("last verified")
+          Text(tr("last verified"))
             .font(.system(size: 9))
             .foregroundStyle(.tertiary)
         }
@@ -1533,10 +1555,12 @@ private struct ServiceStateView: View {
     }
     .help(
       isCached
-        ? "Last verified while booted; launchd state cannot be queried live while this simulator is shutdown."
+        ? tr(
+          "Last verified while booted; launchd state cannot be queried live while this simulator is shutdown."
+        )
         : state.title
     )
-    .accessibilityLabel("Service slimming: \(state.title)")
+    .accessibilityLabel(tr("Service slimming: %@", state.title))
   }
 
 }
@@ -1547,11 +1571,11 @@ private struct ActivityPanel: View {
   var body: some View {
     VStack(spacing: 0) {
       HStack {
-        Label("Activity", systemImage: "text.alignleft")
+        Label(tr("Activity"), systemImage: "text.alignleft")
           .font(.subheadline.weight(.semibold))
         Spacer()
         if !model.activity.isEmpty {
-          Button("Clear") { model.clearActivity() }
+          Button(tr("Clear")) { model.clearActivity() }
             .buttonStyle(.plain)
             .foregroundStyle(.secondary)
         }
@@ -1563,7 +1587,7 @@ private struct ActivityPanel: View {
         HStack(spacing: 8) {
           Image(systemName: "checkmark.circle")
             .foregroundStyle(.green)
-          Text("Ready. Select simulators, then choose an action from the toolbar.")
+          Text(tr("Ready. Select simulators, then choose an action from the toolbar."))
             .foregroundStyle(.secondary)
           Spacer()
         }
@@ -1611,5 +1635,34 @@ private struct ActivityPanel: View {
     case .success: return .green
     case .failure: return .red
     }
+  }
+}
+
+private struct LanguageMenu: View {
+  @EnvironmentObject private var localization: Localization
+
+  var body: some View {
+    Menu {
+      ForEach(AppLanguage.allCases) { language in
+        Button {
+          localization.selectLanguage(language)
+        } label: {
+          if language == localization.selectedLanguage {
+            Label(language.displayName, systemImage: "checkmark")
+          } else {
+            Text(language.displayName)
+          }
+        }
+      }
+      if localization.selectedLanguage != localization.language {
+        Divider()
+        Text(tr("Restart to apply"))
+      }
+    } label: {
+      Label(tr("Language"), systemImage: "globe")
+    }
+    .menuStyle(.borderlessButton)
+    .fixedSize()
+    .accessibilityLabel(tr("Language"))
   }
 }

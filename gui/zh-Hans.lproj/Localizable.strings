@@ -1,0 +1,574 @@
+/* Main UI */
+
+"SimSlim" = "SimSlim";
+"Service slimming · reversible" = "服务瘦身 · 可恢复";
+"Disk analysis & cleanup" = "磁盘分析与清理";
+
+"Memory Use" = "内存占用";
+"Disk Size" = "磁盘占用";
+"Slimming mode" = "瘦身模式";
+
+"Installed Simulators" = "已安装的模拟器";
+"Installed" = "已安装";
+"Booted" = "已启动";
+"Shutdown" = "已关机";
+"Selected" = "已选中";
+"Loading simulator status…" = "正在加载模拟器状态…";
+"Updated %@" = "更新于 %@";
+
+"SIMULATOR" = "模拟器";
+"RUNTIME" = "系统版本";
+"BOOT" = "启动状态";
+"SERVICES" = "服务";
+"DISK SIZE" = "磁盘占用";
+"RAM USAGE" = "内存占用";
+
+"Loading simulators…" = "正在加载模拟器…";
+"No iOS Simulators" = "没有 iOS 模拟器";
+"No Matches" = "无匹配结果";
+"Install an iOS Simulator runtime in Xcode." = "请在 Xcode 中安装 iOS 模拟器运行时。";
+"Try a different name, UDID, or iOS version." = "请尝试其他名称、UDID 或 iOS 版本。";
+
+"Select simulators to change their service profile" = "选择模拟器以更改其服务配置";
+"Select simulators to review reclaimable disk data" = "选择模拟器以查看可清理的磁盘数据";
+"%d selected" = "已选中 %d 个";
+"· profile will disable %d services" = "· 该配置将停用 %d 项服务";
+"· analyzing disk usage…" = "· 正在分析磁盘占用…";
+"· %@ selected for cleanup" = "· 已选择清理 %@";
+"· disk analysis pending" = "· 磁盘分析待完成";
+"Select or deselect all visible simulators" = "选择或取消选择所有可见的模拟器";
+
+"%d of %d" = "%d / %d";
+"Booting and rebooting can take a few minutes" = "启动和重启可能需要几分钟";
+
+/* Toolbar */
+
+"Slim" = "瘦身";
+"Unslim" = "恢复";
+"Clean Disk" = "清理磁盘";
+"Clone" = "克隆";
+"Erase" = "抹掉";
+"Delete" = "删除";
+"Boot" = "启动";
+"Kill" = "关机";
+"Rename" = "重命名";
+"Refresh" = "刷新";
+"Selection" = "选择";
+"Search" = "搜索";
+"Language" = "语言";
+"Language Changed" = "语言已更改";
+"SimSlim applies the new language after it restarts." = "SimSlim 将在重新启动后应用新语言。";
+"Restart Now" = "立即重启";
+"Later" = "稍后";
+"Restart to apply" = "重启后生效";
+
+"Apply the selected service profile" = "应用所选服务配置";
+"Restore all SimSlim-managed services" = "恢复所有 SimSlim 管理的服务";
+"Permanently clean the selected disk categories" = "永久清理所选磁盘类别";
+"Clone for backup or general-purpose use" = "克隆用于备份或日常使用";
+"Erase Simulator" = "抹掉模拟器";
+"Delete Simulator" = "删除模拟器";
+"Boot Simulator" = "启动模拟器";
+"Shut Down Simulator" = "关闭模拟器";
+"Rename Simulator" = "重命名模拟器";
+"Refresh simulator status" = "刷新模拟器状态";
+"Refresh Simulators" = "刷新模拟器";
+"Find a simulator" = "查找模拟器";
+"Clear search" = "清除搜索";
+"Collapse search" = "收起搜索";
+"Select Visible" = "选择可见项";
+"Clear Selection" = "取消选择";
+"%@ — filter active" = "%@ — 筛选中";
+
+/* Sidebar — memory mode */
+
+"Service state" = "服务状态";
+"Stock" = "原厂";
+"Partial" = "部分";
+"Slim" = "瘦身";
+"Services to keep" = "要保留的服务";
+"Full Slim" = "完全瘦身";
+"Sorted by estimated idle memory use. Enable categories your tests need; estimates vary and are not additive." = "按估算的空闲内存占用排序。请勾选你的测试所需的类别；估算值因环境而异，且不可叠加。";
+"Find a service" = "查找服务";
+"No services match “%@”" = "没有匹配“%@”的服务";
+"Clear service search" = "清除服务搜索";
+"Preserve current boot state" = "保持当前启动状态";
+"A simulator that starts shutdown will return to shutdown after its service profile is changed." = "原本处于关机状态的模拟器，在服务配置更改完成后仍会回到关机状态。";
+"%d services will be disabled" = "将停用 %d 项服务";
+"Core workflow and deadlock-prone daemons are never disabled." = "核心工作流与易死锁的守护进程永远不会被停用。";
+"Uses ~%d MB RAM" = "占用约 %d MB 内存";
+"When disabled: " = "停用后：";
+"Keep %@ enabled" = "保留 %@";
+"Keep all controllable services in %@ enabled" = "保留 %@ 中所有可控服务";
+"Show individual services" = "显示各项服务";
+"Hide individual services" = "隐藏各项服务";
+"Always on" = "始终开启";
+"Apple background service." = "Apple 后台服务。";
+
+/* Sidebar — disk mode */
+
+"Cleanup" = "清理";
+"Updates automatically when your selection changes. Analysis is read-only." = "选择变化时自动更新。分析为只读操作。";
+"Re-analyze Selected" = "重新分析所选";
+"Refresh disk usage for the selected simulators" = "刷新所选模拟器的磁盘占用";
+"Storage breakdown" = "存储明细";
+"Read-only sizes. These files are never selected for cleanup." = "只读的占用大小。这些文件永远不会被纳入清理。";
+"Reopen previously booted simulators" = "重新启动之前已启动的模拟器";
+"Required Siri assets aren’t offered for deletion — iOS restores them automatically on launch." = "必需的 Siri 资源不提供删除——iOS 会在启动时自动恢复。";
+"Built-in apps and core OS resources are never modified." = "内置应用与核心系统资源永远不会被修改。";
+"Impact: " = "影响：";
+"Afterward: " = "清理后：";
+"Unable to delete — iOS restores automatically on launch." = "无法删除——iOS 会在启动时自动恢复。";
+"Remove %@" = "移除 %@";
+"Deletion unavailable" = "无法删除";
+"Lower risk" = "较低风险";
+"Restored on demand" = "按需恢复";
+"System managed" = "系统管理";
+
+/* Table row */
+
+"Copy UDID" = "复制 UDID";
+"Copy UDID for %@" = "复制 %@ 的 UDID";
+"Current allocated size of this simulator on disk" = "此模拟器在磁盘上的当前分配大小";
+"Changing…" = "正在更改…";
+"last verified" = "上次验证";
+"Last verified while booted; launchd state cannot be queried live while this simulator is shutdown." = "上次启动时验证；此模拟器处于关机状态时无法实时查询 launchd 状态。";
+"Service slimming: %@" = "服务瘦身：%@";
+"Partial (%d/%d)" = "部分 (%d/%d)";
+"Fully slim (%d/%d)" = "完全瘦身 (%d/%d)";
+"Unknown while shutdown" = "关机时未知";
+
+/* Row menu */
+
+"Power" = "电源";
+"Service Profile" = "服务配置";
+"Disk Space" = "磁盘空间";
+"Simulator" = "模拟器";
+"Finder" = "访达";
+"Status" = "状态";
+"Selection" = "选择";
+"Destructive Actions" = "危险操作";
+"Slim Simulator" = "瘦身模拟器";
+"Unslim Simulator" = "恢复模拟器";
+"Clean Disk Data" = "清理磁盘数据";
+"Clone Simulator" = "克隆模拟器";
+"Rename Simulator" = "重命名模拟器";
+"Show Simulator in Finder" = "在访达中显示模拟器";
+"Show App Data Containers in Finder" = "在访达中显示应用数据容器";
+"Refresh Simulator Status" = "刷新模拟器状态";
+"Refresh RAM" = "刷新内存";
+"Deselect Simulator" = "取消选择模拟器";
+"Select Simulator" = "选择模拟器";
+"Shut Down Simulator" = "关闭模拟器";
+
+/* Activity panel */
+
+"Activity" = "活动";
+"Clear" = "清除";
+"Ready. Select simulators, then choose an action from the toolbar." = "就绪。请选择模拟器，然后从工具栏选择操作。";
+
+/* Batch actions */
+
+"Applying" = "正在应用";
+"Restoring" = "正在恢复";
+"Analyzing" = "正在分析";
+"Cleaning" = "正在清理";
+"Erasing" = "正在抹掉";
+"Deleting" = "正在删除";
+"Erase" = "抹掉";
+"Deletion" = "删除";
+"erase" = "抹掉";
+"delete" = "删除";
+"Erased" = "已抹掉";
+"Deleted" = "已删除";
+"Erasing simulator…" = "正在抹掉模拟器…";
+"Deleting simulator…" = "正在删除模拟器…";
+"Disk analysis" = "磁盘分析";
+"Disk cleanup" = "磁盘清理";
+"Restore" = "恢复";
+"Profile update" = "配置更新";
+"Analyzing…" = "正在分析…";
+"Cleaning disk data…" = "正在清理磁盘数据…";
+"Measuring memory…" = "正在测量内存…";
+"Cloning apps, data, and service profile…" = "正在克隆应用、数据和服务配置…";
+"Renaming simulator…" = "正在重命名模拟器…";
+"Booting simulator…" = "正在启动模拟器…";
+"Shutting down simulator…" = "正在关闭模拟器…";
+"Applying service profile…" = "正在应用服务配置…";
+"Restoring stock services…" = "正在恢复原厂服务…";
+"Pending" = "待完成";
+"No selection" = "未选择";
+"Simulators" = "个模拟器";
+"s" = "个";
+
+/* Activity messages */
+
+"Cleaning disk data from %@" = "正在清理 %@ 的磁盘数据";
+"Cleaned %@: reclaimed %@" = "已清理 %@：回收了 %@";
+"Could not clean %@: %@" = "无法清理 %@：%@";
+"Measured %@: %d processes, %@" = "已测量 %@：%d 个进程，%@";
+"Could not measure %@: %@" = "无法测量 %@：%@";
+"Cloning %@ as %@" = "正在将 %@ 克隆为 %@";
+"Cloned %@ as %@, including its service profile" = "已将 %@ 克隆为 %@，包含其服务配置";
+"Could not clone %@: %@" = "无法克隆 %@：%@";
+"Renaming %@ to %@" = "正在将 %@ 重命名为 %@";
+"Renamed %@ to %@" = "已将 %@ 重命名为 %@";
+"Could not rename %@: %@" = "无法重命名 %@：%@";
+"Booting %@" = "正在启动 %@";
+"Booted %@" = "已启动 %@";
+"Could not boot %@: %@" = "无法启动 %@：%@";
+"Shutting down %@" = "正在关闭 %@";
+"Shut down %@" = "已关闭 %@";
+"Could not shut down %@: %@" = "无法关闭 %@：%@";
+"Could not analyze %@: %@" = "无法分析 %@：%@";
+"Could not %@ %@: %@" = "无法%@ %@：%@";
+"Could not %@ %@" = "无法%@%@";
+"Disk analysis finished for all %d selected simulators" = "已为全部 %d 个所选模拟器完成磁盘分析";
+"%@ %@" = "%@ %@";
+"Applying service profile to %@" = "正在对 %@ 应用服务配置";
+"Updated %@: %@" = "已更新 %@：%@";
+"Could not slim %@: %@" = "无法瘦身 %@：%@";
+"Restoring %@ to stock" = "正在将 %@ 恢复为原厂状态";
+"Restored %@: %@" = "已恢复 %@：%@";
+"Could not restore %@: %@" = "无法恢复 %@：%@";
+"%@ finished for all %d selected simulators" = "%@ 已为全部 %d 个所选模拟器完成";
+"%@ finished with %d failure%@ out of %d. Check Activity for details." = "%@ 完成，%d 个所选模拟器中有 %d 项失败。详情请查看“活动”。";
+"Refresh failed: %@" = "刷新失败：%@";
+"%@ exited with status %d.\n\n%@" = "%@ 退出，状态码为 %d。\n\n%@";
+"%d %@?" = "%d %@？";
+"Permanently Clean %d Simulator%@?" = "永久清理 %d 个模拟器%@？";
+
+/* Sheets */
+
+"Clone Before Slimming?" = "瘦身前先克隆？";
+"We recommend making a clone before applying a service profile, so your current apps, data, settings, and simulator state remain available if anything unexpected happens." = "建议在应用服务配置前先创建克隆，这样即使出现意外，你当前的应用、数据、设置和模拟器状态仍然可用。";
+"Backup or general-purpose simulator" = "备份或日常用途的模拟器";
+"The clone keeps the same apps, data, settings, and current service profile. SimSlim rebuilds simulator-local links and registrations so it is ready for separate use as a point-in-time backup or development simulator." = "克隆会保留相同的应用、数据、设置和当前服务配置。SimSlim 会重建模拟器本地链接和注册信息，使其可作为时间点备份或开发模拟器独立使用。";
+"To create backups for multiple selections, clone each simulator from its row menu or select one simulator at a time in the toolbar." = "要为多个选择创建备份，请从每行的菜单克隆各模拟器，或在工具栏中一次只选择一个模拟器。";
+"Continue Without Clone" = "不克隆，继续";
+"Cancel" = "取消";
+"OK" = "好";
+
+"Simulator name" = "模拟器名称";
+"Name" = "名称";
+"Clone Simulator" = "克隆模拟器";
+"Rename Simulator" = "重命名模拟器";
+"%@ Copy" = "%@ 副本";
+
+"Renaming changes only the simulator’s display name. Its apps, data, runtime, and service profile stay the same." = "重命名只会更改模拟器的显示名称。其应用、数据、运行时和服务配置保持不变。";
+"The clone copies the source simulator’s apps, data, settings, and current SimSlim service profile. SimSlim rebases simulator-local links, rebuilds generated app registrations, and audits the running clone for open paths into the source. SimSlim may briefly boot a shutdown source to read its profile, or briefly shut down a booted source to make the copy. The source returns to its original boot state, and the clone finishes shutdown." = "克隆会复制源模拟器的应用、数据、设置和当前 SimSlim 服务配置。SimSlim 会重定模拟器本地链接的基准、重建生成的应用注册，并审计运行中的克隆是否存在指向源模拟器的打开路径。SimSlim 可能会短暂启动处于关机状态的源模拟器以读取其配置，或短暂关闭已启动的源模拟器以完成复制。源模拟器会回到原始启动状态，克隆完成后处于关机状态。";
+
+"Erase %d %@" = "抹掉 %d 个%@？";
+"Delete %d %@" = "删除 %d 个%@？";
+"All apps, data, settings, and service-slimming overrides will be removed. The simulator devices remain available, reset to stock, and shutdown. This cannot be undone." = "所有应用、数据、设置和服务瘦身覆盖将被移除。模拟器设备仍可使用，恢复原厂状态并关机。此操作无法撤销。";
+"The selected simulator devices and all of their apps, data, and settings will be permanently removed. This cannot be undone." = "所选模拟器设备及其所有应用、数据和设置将被永久移除。此操作无法撤销。";
+"Booted simulators will be shut down first." = "已启动的模拟器将先被关闭。";
+"Calculating…" = "正在计算…";
+
+"Permanently Clean %d Simulator%@" = "永久清理 %d 个模拟器%@？";
+"Approximately %@ will be removed immediately, not moved to Trash. Generated data stays deleted; on-demand language data can be downloaded again by iOS." = "约 %@ 将被立即移除，而不会移入废纸篓。生成的数据将保持删除；按需语言数据可由 iOS 重新下载。";
+"Recommended: clone before cleaning" = "建议：清理前先克隆";
+"A clone preserves the simulator’s current apps, data, settings, and service profile before this permanent cleanup. It can be kept as a backup or used as a normal simulator." = "在此永久清理之前，克隆会保留模拟器当前的应用、数据、设置和服务配置。它可作为备份保留，也可作为普通模拟器使用。";
+"Clone Simulator First" = "先克隆模拟器";
+"Clone each selected simulator individually from its row menu or the toolbar before continuing." = "继续之前，请从每行的菜单或工具栏逐个克隆所选的模拟器。";
+"Erase is not an undo for cleanup data" = "抹掉不是清理数据的撤销操作";
+"Deleted caches, logs, and temporary history do not come back. Downloaded language data may return when a feature needs it. Erase is only a way to create a usable fresh simulator if cleanup causes trouble; it also removes every remaining app, setting, and user-data container." = "已删除的缓存、日志和临时历史不会恢复。已下载的语言数据可能在功能需要时重新出现。抹掉只是在清理引发问题时创建可用全新模拟器的一种方式；它还会移除所有剩余的应用、设置和用户数据容器。";
+"Type CLEAN to continue" = "输入 CLEAN 以继续";
+"CLEAN" = "CLEAN";
+"Clean Disk Data" = "清理磁盘数据";
+
+/* Errors */
+
+"SimSlim couldn’t finish" = "SimSlim 无法完成";
+"The bundled simslim command could not be found. Rebuild the app with scripts/build-app.sh." = "找不到内置的 simslim 命令。请使用 scripts/build-app.sh 重新构建应用。";
+"Could not read the response from simslim %@: %@" = "无法读取 simslim %@ 的响应：%@";
+"The directory for %@ does not exist at %@." = "%@ 的目录不存在于 %@。";
+"Finder could not open %@." = "访达无法打开 %@。";
+
+/* Go CLI data — categories */
+
+"Widgets & Wallpaper" = "小组件与壁纸";
+"Home and lock screen posters, widgets, and Live Activities." = "主屏幕与锁屏海报、小组件和实时活动。";
+"Home and Lock Screen widgets, wallpaper posters, and Live Activities stop updating." = "主屏幕与锁屏小组件、壁纸海报和实时活动停止更新。";
+
+"Siri & Intelligence" = "Siri 与智能";
+"Siri, Apple Intelligence, speech, and on-device ML model services." = "Siri、Apple Intelligence、语音和设备端机器学习模型服务。";
+"Siri, speech features, and Apple Intelligence services are unavailable." = "Siri、语音功能和 Apple Intelligence 服务不可用。";
+
+"Spotlight & Search" = "聚焦与搜索";
+"On-device Spotlight and in-Settings search services." = "设备端聚焦与设置内搜索服务。";
+"Spotlight and Settings search return no results." = "聚焦与设置搜索不返回结果。";
+
+"iCloud & Apple Account" = "iCloud 与 Apple 账户";
+"iCloud sync, Apple Account, keychain, and backup services." = "iCloud 同步、Apple 账户、钥匙串和备份服务。";
+"iCloud sync, Apple Account, Keychain, and backup workflows will not work." = "iCloud 同步、Apple 账户、钥匙串和备份工作流将无法使用。";
+
+"App Store, Push & Media" = "App Store、推送与媒体";
+"App Store, push notification, StoreKit, and media services." = "App Store、推送通知、StoreKit 和媒体服务。";
+"Remote push notifications and StoreKit or App Store testing will not work." = "远程推送通知以及 StoreKit 或 App Store 测试将无法使用。";
+
+"Mail, Calendar & Contacts" = "邮件、日历与通讯录";
+"Mail, Calendar, Contacts, Reminders, and related sync services." = "邮件、日历、通讯录、提醒事项及相关同步服务。";
+"Contacts, Calendar, Reminders, and Mail-backed pickers or sync may fail." = "通讯录、日历、提醒事项以及依赖邮件的选择器或同步可能失败。";
+
+"Safari Sync & Web Services" = "Safari 同步与网络服务";
+"Safari sync, web push, privacy, and universal-link services." = "Safari 同步、网络推送、隐私和通用链接服务。";
+"Universal links and Safari sync or background web services will not work." = "通用链接以及 Safari 同步或后台网络服务将无法使用。";
+
+"Family & Screen Time" = "家人共享与屏幕使用时间";
+"Family Sharing, Screen Time, and usage tracking." = "家人共享、屏幕使用时间和使用情况追踪。";
+"Family Sharing, Screen Time, and usage tracking stop working." = "家人共享、屏幕使用时间和使用情况追踪停止工作。";
+
+"Health, Home & Fitness" = "健康、家庭与健身";
+"HealthKit, HomeKit, and Fitness services." = "HealthKit、HomeKit 和健身服务。";
+"HealthKit, HomeKit, and Fitness integrations will not work." = "HealthKit、HomeKit 和健身集成将无法使用。";
+
+"Photos & Media Analysis" = "照片与媒体分析";
+"Photos library, photo analysis, and media analysis services." = "照片图库、照片分析与媒体分析服务。";
+"Photo picker, Photos-library workflows, and media analysis may fail." = "照片选择器、照片图库工作流和媒体分析可能失败。";
+
+"News, Weather, Maps & Games" = "新闻、天气、地图与游戏";
+"News, Weather, Maps, Tips, and game services." = "新闻、天气、地图、提示和游戏服务。";
+"News, Weather, Maps background data, and game-controller services are unavailable." = "新闻、天气、地图后台数据以及游戏控制器服务不可用。";
+
+"Messaging & FaceTime" = "信息与 FaceTime";
+"iMessage, FaceTime, call, and identity services." = "iMessage、FaceTime、通话和身份服务。";
+"iMessage, FaceTime, and related identity services will not work." = "iMessage、FaceTime 及相关身份服务将无法使用。";
+
+"Sharing & Device Connectivity" = "共享与设备互联";
+"AirDrop, Continuity, CarPlay, Watch, and Find My services." = "隔空投送、连续互通、CarPlay、Watch 和查找服务。";
+"AirDrop, Continuity, CarPlay, Watch, and Find My connectivity will not work." = "隔空投送、连续互通、CarPlay、Watch 和查找的连接将无法使用。";
+"Required for system share sheets." = "系统共享面板所需。";
+
+"Ads, Diagnostics & Telemetry" = "广告、诊断与遥测";
+"DeviceCheck, ad privacy, analytics, diagnostics, and feedback services." = "DeviceCheck、广告隐私、分析、诊断和反馈服务。";
+"DeviceCheck plus analytics, diagnostics, and feedback services are unavailable." = "DeviceCheck 以及分析、诊断和反馈服务不可用。";
+
+"Other Background Services" = "其他后台服务";
+"Wallet, business services, assets, and miscellaneous background daemons." = "钱包、商务服务、资源和杂项后台守护进程。";
+"Wallet, merchant, business, asset, and miscellaneous background services are unavailable." = "钱包、商户、商务、资源和杂项后台服务不可用。";
+
+/* Go CLI data — disk cleanup categories */
+
+"System & App Caches" = "系统与应用缓存";
+"Generated cache files belonging to iOS and installed apps." = "iOS 与已安装应用生成的缓存文件。";
+"Next launches may be slower; downloaded or offline cache content can disappear." = "下次启动可能变慢；已下载或离线缓存内容可能消失。";
+"Old cache contents stay deleted; apps build new caches as needed." = "旧缓存内容保持删除；应用会按需重建缓存。";
+
+"Logs & Diagnostics" = "日志与诊断";
+"Unified logs, signposts, symbol text, crash logs, and app log folders." = "统一日志、标记点、符号文本、崩溃日志和应用日志文件夹。";
+"Existing diagnostic and crash history is deleted." = "现有诊断与崩溃历史将被删除。";
+"Old history stays deleted; future runs create new logs." = "旧历史保持删除；后续运行会生成新日志。";
+
+"Temporary Files" = "临时文件";
+"Files in simulator and app temporary directories." = "模拟器与应用临时目录中的文件。";
+"Apps that misuse temporary storage may lose in-progress work." = "滥用临时存储的应用可能丢失进行中的工作。";
+"Old contents stay deleted; apps create new temporary files as needed." = "旧内容保持删除；应用会按需创建新的临时文件。";
+
+"Downloaded Language Data" = "已下载的语言数据";
+"On-demand language models used by Siri, Search, and text analysis." = "Siri、搜索和文本分析使用的按需语言模型。";
+"Language-aware features may be limited until iOS downloads the package again." = "在 iOS 重新下载该包之前，语言相关功能可能受限。";
+"iOS downloads the language package again when a feature needs it." = "当功能需要时，iOS 会重新下载语言包。";
+
+"Required Siri Assets" = "必需的 Siri 资源";
+"Siri understanding, speech, voice, and accessibility downloads restored by iOS." = "由 iOS 恢复的 Siri 理解、语音、声音和无障碍下载资源。";
+"Manual deletion is unsupported, and iOS promptly downloads required assets again." = "不支持手动删除，iOS 会立即重新下载必需资源。";
+"Required assets return automatically after boot." = "必需资源会在启动后自动恢复。";
+
+/* Go CLI data — disk storage rows */
+
+"Installed Apps" = "已安装的应用";
+"Developer-installed app and test-runner bundles. Built-in apps live in the shared runtime." = "开发者安装的应用与测试运行器包。内置应用位于共享运行时中。";
+"Documents" = "文稿";
+"Files in app and app-group Documents directories." = "应用与应用组文稿目录中的文件。";
+"App Data" = "应用数据";
+"Preferences, databases, and support files outside Documents and cleanup categories." = "文稿与清理类别之外的偏好设置、数据库和支持文件。";
+"User Media" = "用户媒体";
+"Photos, videos, downloads, and other files in the simulator media library." = "模拟器媒体图库中的照片、视频、下载及其他文件。";
+
+/* Go CLI data — service descriptions */
+
+"Renders Home and Lock Screen wallpaper scenes." = "渲染主屏幕与锁屏壁纸场景。";
+"Refreshes widgets and complications on schedule." = "按计划刷新小组件与复杂功能。";
+"Updates Live Activities and Dynamic Island content." = "更新实时活动与灵动岛内容。";
+
+"Coordinates Siri requests and assistant state." = "协调 Siri 请求与助理状态。";
+"Routes commands and intents submitted to Siri." = "路由提交给 Siri 的命令与意图。";
+"Provides supporting services for Siri requests." = "为 Siri 请求提供支持服务。";
+"Executes Siri actions and App Intents." = "执行 Siri 操作与 App Intents。";
+"Runs Siri inference and intent predictions." = "运行 Siri 推理与意图预测。";
+"Maintains knowledge and context used by Siri." = "维护 Siri 使用的知识与上下文。";
+"Generates Siri's spoken responses." = "生成 Siri 的语音回复。";
+"Builds device context for Siri requests." = "为 Siri 请求构建设备上下文。";
+"Processes acoustic signatures for voice features." = "处理语音功能的声学特征。";
+"Provides speech recognition and voice-trigger services." = "提供语音识别与语音触发服务。";
+"Manages system voices and speech assets." = "管理系统语音与语音资源。";
+"Supports Personal Voice and voice banking." = "支持个人声音与语音库。";
+"Adapts on-device speech recognition models." = "适配设备端语音识别模型。";
+"Coordinates Apple Intelligence services." = "协调 Apple Intelligence 服务。";
+"Collects local context for intelligence features." = "为智能功能收集本地上下文。";
+"Orchestrates Apple Intelligence workflows." = "编排 Apple Intelligence 工作流。";
+"Runs background Apple Intelligence tasks." = "运行后台 Apple Intelligence 任务。";
+"Supports generative intelligence experiences." = "支持生成式智能体验。";
+"Builds on-device knowledge used by suggestions." = "构建建议所用的设备端知识。";
+"Performs natural-language analysis." = "执行自然语言分析。";
+"Extracts meaning and entities from text." = "从文本中提取含义与实体。";
+"Tracks machine-learning models available to the system." = "追踪系统可用的机器学习模型。";
+"Downloads and manages on-device models." = "下载并管理设备端模型。";
+"Hosts system machine-learning services." = "承载系统机器学习服务。";
+"Executes on-device machine-learning models." = "执行设备端机器学习模型。";
+"Generates system suggestions and predictions." = "生成系统建议与预测。";
+"Provides network-backed Siri and Spotlight suggestions." = "提供网络支持的 Siri 与聚焦建议。";
+"Collects feedback for Siri and Spotlight suggestions." = "收集 Siri 与聚焦建议的反馈。";
+"Tracks events used by proactive suggestions." = "追踪主动建议所用的事件。";
+
+"Coordinates system search queries." = "协调系统搜索查询。";
+"Runs helper tasks for system search." = "运行系统搜索的辅助任务。";
+"Builds knowledge used by Spotlight results." = "构建聚焦结果所用的知识。";
+"Refreshes Spotlight's knowledge data." = "刷新聚焦的知识数据。";
+"Indexes and searches app-provided content." = "索引并搜索应用提供的内容。";
+
+"Maintains Apple Account state on the device." = "维护设备上的 Apple 账户状态。";
+"Checks Apple Account security records." = "检查 Apple 账户安全记录。";
+"Handles Apple Account setup workflows." = "处理 Apple 账户设置工作流。";
+"Provides Apple Account authentication tokens." = "提供 Apple 账户认证令牌。";
+"Manages App Store and media account state." = "管理 App Store 与媒体账户状态。";
+"Handles App Store and media engagement messages." = "处理 App Store 与媒体的互动消息。";
+"Stores Apple media-service data on the device." = "在设备上存储 Apple 媒体服务数据。";
+"Synchronizes CloudKit databases and records." = "同步 CloudKit 数据库与记录。";
+"Synchronizes the iCloud Photos library." = "同步 iCloud 照片图库。";
+"Schedules non-urgent CloudKit transfers." = "调度非紧急的 CloudKit 传输。";
+"Synchronizes supported system settings through iCloud." = "通过 iCloud 同步受支持的系统设置。";
+"Synchronizes iCloud Drive files." = "同步 iCloud 云盘文件。";
+"Synchronizes supported preferences between devices." = "在设备间同步受支持的偏好设置。";
+"Handles iCloud data-protection setup and recovery." = "处理 iCloud 数据保护设置与恢复。";
+"Synchronizes iCloud Keychain secure items." = "同步 iCloud 钥匙串安全项目。";
+"Handles secure backup and account recovery data." = "处理安全备份与账户恢复数据。";
+"Maintains trusted peers for iCloud Keychain." = "维护 iCloud 钥匙串的受信任对端。";
+"Synchronizes protected cloud encryption keys." = "同步受保护的云端加密密钥。";
+"Runs background services for iCloud Mail." = "运行 iCloud 邮件的后台服务。";
+"Evaluates iCloud storage subscription recommendations." = "评估 iCloud 存储订阅建议。";
+"Maintains communication trust and safety state." = "维护通信信任与安全状态。";
+
+"Installs and updates apps from the App Store." = "从 App Store 安装并更新应用。";
+"Provides background components used by the App Store." = "提供 App Store 使用的后台组件。";
+"Receives Apple Push Notification service messages." = "接收 Apple 推送通知服务消息。";
+"Synchronizes purchased and cloud media libraries." = "同步已购买与云端媒体资源库。";
+"Handles media-store accounts and purchases." = "处理媒体商店账户与购买。";
+"Processes StoreKit products and transactions." = "处理 StoreKit 商品与交易。";
+"Manages video subscriptions and TV providers." = "管理视频订阅与电视提供商。";
+"Manages subscribed media assets and downloads." = "管理订阅的媒体资源与下载。";
+"Runs background Music library and playback services." = "运行后台音乐资源库与播放服务。";
+
+"Fetches, indexes, and sends Mail account data." = "获取、索引并发送邮件账户数据。";
+"Synchronizes Microsoft Exchange account data." = "同步 Microsoft Exchange 账户数据。";
+"Synchronizes CalDAV, CardDAV, and related accounts." = "同步 CalDAV、CardDAV 及相关账户。";
+"Provides access to Calendar event data." = "提供对日历事件数据的访问。";
+"Stores and synchronizes reminders." = "存储并同步提醒事项。";
+"Provides access to the Contacts database." = "提供对通讯录数据库的访问。";
+"Synchronizes Contact Posters." = "同步联系人海报。";
+"Builds people and relationship suggestions." = "构建人物与关系建议。";
+
+"Synchronizes Safari bookmarks through iCloud." = "通过 iCloud 同步 Safari 书签。";
+"Maintains and synchronizes Safari history." = "维护并同步 Safari 历史记录。";
+"Checks saved passwords for known data leaks." = "检查已保存密码是否涉及已知泄露。";
+"Checks sites against unsafe browsing data." = "对照不安全浏览数据检查网站。";
+"Fetches Safari content in the background." = "在后台获取 Safari 内容。";
+"Maintains web bookmarks, clips, and Reading List data." = "维护网络书签、剪辑和阅读列表数据。";
+"Processes privacy-preserving web ad attribution." = "处理保护隐私的网络广告归因。";
+"Receives push notifications for websites." = "接收网站推送通知。";
+"Maintains Safari privacy-protection data." = "维护 Safari 隐私保护数据。";
+"Matches universal links with installed apps." = "将通用链接与已安装应用匹配。";
+
+"Maintains Family Sharing membership and state." = "维护家人共享成员资格与状态。";
+"Applies parental and Family Controls restrictions." = "应用家长控制与家庭控制限制。";
+"Delivers Family Sharing invitations and notices." = "投递家人共享邀请与通知。";
+"Handles Ask to Buy permission requests." = "处理购买前询问的许可请求。";
+"Routes family approval prompts and responses." = "路由家庭批准提示与回复。";
+"Enforces Screen Time limits and reports usage." = "强制执行屏幕使用时间限制并报告使用情况。";
+"Connects Screen Time data to Settings." = "将屏幕使用时间数据连接到设置。";
+"Tracks app and website usage duration." = "追踪应用与网站的使用时长。";
+
+"Stores and serves HealthKit data." = "存储并提供 HealthKit 数据。";
+"Runs background tasks for the Health app." = "运行健康应用的后台任务。";
+"Provides educational and recommended health content." = "提供教育性与推荐的健康内容。";
+"Processes health events and related notifications." = "处理健康事件及相关通知。";
+"Synchronizes clinical health records." = "同步临床健康记录。";
+"Analyzes Wallet transactions and financial-health data." = "分析钱包交易与财务健康数据。";
+"Manages HomeKit accessories, rooms, and automations." = "管理 HomeKit 配件、房间与自动化。";
+"Processes HomeKit events and automation triggers." = "处理 HomeKit 事件与自动化触发器。";
+"Runs Apple Fitness content and background services." = "运行 Apple Fitness 内容与后台服务。";
+"Manages active Apple Fitness sessions." = "管理进行中的 Apple Fitness 健身活动。";
+"Provides Fitness coaching recommendations." = "提供健身指导建议。";
+"Generates personalized Fitness insights." = "生成个性化健身洞察。";
+"Tracks Activity awards and achievements." = "追踪健身记录奖项与成就。";
+"Synchronizes shared Activity and Fitness data." = "同步共享的健身记录与体能数据。";
+
+"Analyzes photos for scenes, people, and search." = "分析照片的场景、人物与搜索。";
+"Performs face detection for the Photos library." = "为照片图库执行人脸检测。";
+"Analyzes image, video, and audio content." = "分析图像、视频与音频内容。";
+"Runs isolated media-analysis work." = "运行隔离的媒体分析工作。";
+"Synchronizes shared and streamed photo content." = "同步共享与流媒体照片内容。";
+"Maintains the system media library database." = "维护系统媒体资源库数据库。";
+"Provides access to Photos library assets." = "提供对照片图库资源的访问。";
+"Handles cloud-backed Photos asset transfers." = "处理云端支持的照片资源传输。";
+
+"Downloads and refreshes Apple News content." = "下载并刷新 Apple News 内容。";
+"Fetches forecasts and weather data." = "获取预报与天气数据。";
+"Synchronizes Maps favorites, guides, and history." = "同步地图收藏、指南与历史。";
+"Receives background updates for Maps." = "接收地图的后台更新。";
+"Improves and corrects map location data." = "改进并纠正地图位置数据。";
+"Predicts and maintains suggested destinations." = "预测并维护建议的目的地。";
+"Renders static map snapshots for apps." = "为应用渲染静态地图快照。";
+"Downloads assets used by Apple content apps." = "下载 Apple 内容应用使用的资源。";
+"Selects and refreshes content for the Tips app." = "选择并刷新提示应用的内容。";
+"Provides Game Center accounts and multiplayer state." = "提供 Game Center 账户与多人游戏状态。";
+"Synchronizes supported game save data." = "同步受支持的游戏存档数据。";
+"Discovers controllers and routes their input." = "发现控制器并路由其输入。";
+
+"Maintains identities used by iMessage and FaceTime." = "维护 iMessage 与 FaceTime 使用的身份。";
+"Provides simulator support for Apple identity services." = "为 Apple 身份服务提供模拟器支持。";
+"Removes Messages history according to retention settings." = "根据保留设置移除信息历史。";
+"Transfers Messages attachments and media." = "传输信息附件与媒体。";
+"Stores Messages conversations and metadata." = "存储信息会话与元数据。";
+"Stores FaceTime messages and related data." = "存储 FaceTime 信息及相关数据。";
+"Coordinates FaceTime and system call state." = "协调 FaceTime 与系统通话状态。";
+
+"Discovers nearby devices for Continuity features." = "为连续互通功能发现附近设备。";
+"Coordinates communication with paired companion devices." = "协调与已配对伴侣设备的通信。";
+"Provides CarPlay connection and vehicle services." = "提供 CarPlay 连接与车辆服务。";
+"Handles connectivity with a paired Apple Watch." = "处理与已配对 Apple Watch 的连接。";
+"Provides Apple TV discovery and remote control." = "提供 Apple TV 发现与远程控制。";
+"Maintains avatars and Memoji assets." = "维护头像与 Memoji 资源。";
+"Maintains sticker packs and recently used stickers." = "维护贴纸包与最近使用的贴纸。";
+"Supports social sharing and activity features." = "支持社交共享与活动功能。";
+"Supports announced notifications and audio messages." = "支持朗读通知与语音信息。";
+"Coordinates background navigation state." = "协调后台导航状态。";
+"Provides device location data to Find My." = "向查找提供设备位置数据。";
+
+"Maintains advertising privacy preferences and state." = "维护广告隐私偏好与状态。";
+"Fetches and manages promoted Apple content." = "获取并管理推广的 Apple 内容。";
+"Runs system diagnostic data collectors." = "运行系统诊断数据收集器。";
+"Collects and submits system feedback reports." = "收集并提交系统反馈报告。";
+"Reports diagnostics for real-time communications." = "报告实时通信的诊断数据。";
+"Uploads security and trust telemetry." = "上传安全与信任遥测数据。";
+"Collects Maps and location-quality analytics." = "收集地图与位置质量分析。";
+"Manages system feature experiments and configurations." = "管理系统功能实验与配置。";
+"Schedules account and setup follow-up notices." = "调度账户与设置跟进通知。";
+"Maintains Setup Assistant completion state." = "维护设置助理的完成状态。";
+"Provides DeviceCheck and app-attestation services." = "提供 DeviceCheck 与 App 认证服务。";
+
+"Provides Wallet transaction and finance services." = "提供钱包交易与金融服务。";
+"Manages Wallet passes and Apple Pay state." = "管理钱包凭证与 Apple Pay 状态。";
+"Looks up merchant details for Wallet transactions." = "查询钱包交易的商户详情。";
+"Manages supported digital identity credentials." = "管理受支持的数字身份凭证。";
+"Supports Apple business messaging and services." = "支持 Apple 商务信息与服务。";
+"Coordinates app access to supported accessories." = "协调应用对受支持配件的访问。";
+"Replicates supported system data between services." = "在服务间复制受支持的系统数据。";
+"Indexes App Intents and shortcut suggestions." = "索引 App Intents 与快捷指令建议。";
+"Receives background iCloud notifications." = "接收后台 iCloud 通知。";
+"Calculates storage usage shown by the system." = "计算系统显示的存储占用。";
+"Shares Focus, presence, and status between devices." = "在设备间共享专注模式、在线状态与状态。";
+"Determines regional availability for system features." = "确定系统功能的区域可用性。";
+"Downloads and manages system asset packages." = "下载并管理系统资源包。";
+"Enforces managed passcode requirements." = "强制执行受管理的密码要求。";

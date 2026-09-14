@@ -52,6 +52,20 @@ cp "$ROOT_DIR/gui/Info.plist" "$STAGED_APP/Contents/Info.plist"
 plutil -replace CFBundleShortVersionString -string "$APP_VERSION" "$STAGED_APP/Contents/Info.plist"
 plutil -replace CFBundleVersion -string "$BUILD_NUMBER" "$STAGED_APP/Contents/Info.plist"
 
+# Bundle the in-app localization tables (gui/*.lproj) so language switching
+# can load them from the app bundle at runtime.
+for lproj_dir in "$ROOT_DIR"/gui/*.lproj; do
+  [[ -d "$lproj_dir" ]] || continue
+  lproj_name="$(basename "$lproj_dir")"
+  mkdir -p "$STAGED_APP/Contents/Resources/$lproj_name"
+  cp "$lproj_dir"/*.strings "$STAGED_APP/Contents/Resources/$lproj_name/"
+done
+if [[ -d "$STAGED_APP/Contents/Resources/zh-Hans.lproj" ]]; then
+  plutil -replace CFBundleLocalizations -array "$STAGED_APP/Contents/Info.plist"
+  plutil -insert CFBundleLocalizations.0 -string en "$STAGED_APP/Contents/Info.plist"
+  plutil -insert CFBundleLocalizations.0 -string zh-Hans "$STAGED_APP/Contents/Info.plist"
+fi
+
 echo "Building macOS app icon…"
 ICONSET_DIR="$STAGING_DIR/SimSlim.iconset"
 mkdir -p "$ICONSET_DIR"
@@ -95,6 +109,7 @@ xcrun swiftc \
   -framework SwiftUI \
   "$ROOT_DIR/gui/Models.swift" \
   "$ROOT_DIR/gui/Backend.swift" \
+  "$ROOT_DIR/gui/Localization.swift" \
   "$ROOT_DIR/gui/AppModel.swift" \
   "$ROOT_DIR/gui/SimulatorManagementViews.swift" \
   "$ROOT_DIR/gui/ContentView.swift" \

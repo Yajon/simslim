@@ -9,12 +9,12 @@ enum BackendError: LocalizedError {
     switch self {
     case .executableMissing:
       return
-        "The bundled simslim command could not be found. Rebuild the app with scripts/build-app.sh."
+        tr("The bundled simslim command could not be found. Rebuild the app with scripts/build-app.sh.")
     case .commandFailed(let arguments, let exitCode, let output):
       let command = (["simslim"] + arguments).joined(separator: " ")
-      return "\(command) exited with status \(exitCode).\n\n\(output)"
+      return tr("%@ exited with status %d.\n\n%@", command, exitCode, output)
     case .invalidResponse(let command, let detail):
-      return "Could not read the response from simslim \(command): \(detail)"
+      return tr("Could not read the response from simslim %@: %@", command, detail)
     }
   }
 }

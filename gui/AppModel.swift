@@ -115,6 +115,10 @@ final class AppModel: ObservableObject {
     batchProgress?.action == "Analyzing"
   }
 
+  private static let localizedActions: Set<String> = [
+    "Applying", "Restoring", "Analyzing", "Cleaning", "Erasing", "Deleting",
+  ]
+
   var selectedDiskCleanupBytes: Int64 {
     diskCleanupBytes(for: selectedDevices, categoryIDs: selectedDiskCleanupCategoryIDs)
   }
@@ -196,7 +200,8 @@ final class AppModel: ObservableObject {
       lastUpdated = Date()
       scheduleDiskSizeRefresh(for: devices)
     } catch {
-      recordFailure("Refresh failed: \(error.localizedDescription)", present: true)
+      recordFailure(
+        tr("Refresh failed: %@", error.localizedDescription), present: true)
     }
   }
 
@@ -304,15 +309,17 @@ final class AppModel: ObservableObject {
 
   func diskCleanupSizeText(for categoryID: String) -> String {
     guard !selectedDevices.isEmpty else { return "—" }
-    guard !isAnalyzingDisk else { return "Analyzing…" }
+    guard !isAnalyzingDisk else { return tr("Analyzing…") }
     guard let bytes = diskCleanupBytes(for: categoryID) else {
-      return "Pending"
+      return tr("Pending")
     }
     return ByteCountFormatter.string(fromByteCount: bytes, countStyle: .file)
   }
 
   func diskStorageSizeText(for storageID: String) -> String {
-    guard diskAnalysisCoversSelection else { return isAnalyzingDisk ? "Analyzing…" : "Pending" }
+    guard diskAnalysisCoversSelection else {
+      return isAnalyzingDisk ? tr("Analyzing…") : tr("Pending")
+    }
     let bytes = selectedDevices.reduce(0) {
       $0 + (diskCleanupPlans[$1.udid]?.storageBytes(for: storageID) ?? 0)
     }
@@ -320,9 +327,9 @@ final class AppModel: ObservableObject {
   }
 
   func selectedDiskCleanupSizeText() -> String {
-    guard !selectedDevices.isEmpty else { return "No selection" }
-    guard !isAnalyzingDisk else { return "Analyzing…" }
-    guard diskAnalysisCoversSelection else { return "Pending" }
+    guard !selectedDevices.isEmpty else { return tr("No selection") }
+    guard !isAnalyzingDisk else { return tr("Analyzing…") }
+    guard diskAnalysisCoversSelection else { return tr("Pending") }
     return ByteCountFormatter.string(fromByteCount: selectedDiskCleanupBytes, countStyle: .file)
   }
 
@@ -357,11 +364,11 @@ final class AppModel: ObservableObject {
           preserveBootState: self.preserveBootState
         )
         self.diskCleanupPlans.removeValue(forKey: device.udid)
-        self.record(.success, "Cleaned \(device.name): reclaimed \(result.reclaimedText)")
+        self.record(.success, tr("Cleaned %@: reclaimed %@", device.name, result.reclaimedText))
         return true
       } catch {
         self.recordFailure(
-          "Could not clean \(device.name): \(error.localizedDescription)", present: false)
+          tr("Could not clean %@: %@", device.name, error.localizedDescription), present: false)
         return false
       }
     }
@@ -372,7 +379,7 @@ final class AppModel: ObservableObject {
 
   func measure(_ device: SimulatorDevice) async {
     guard let backend, device.isBooted, !isBusy(device) else { return }
-    setOperation("Measuring memory…", for: device.udid)
+    setOperation(tr("Measuring memory…"), for: device.udid)
     defer { clearOperation(for: device.udid) }
 
     do {
@@ -380,10 +387,12 @@ final class AppModel: ObservableObject {
       measurements[device.udid] = measurement
       record(
         .success,
-        "Measured \(device.name): \(measurement.processes) processes, \(measurement.memoryText)")
+        tr(
+          "Measured %@: %d processes, %@",
+          device.name, measurement.processes, measurement.memoryText))
     } catch {
       recordFailure(
-        "Could not measure \(device.name): \(error.localizedDescription)", present: true)
+        tr("Could not measure %@: %@", device.name, error.localizedDescription), present: true)
     }
   }
 
@@ -410,8 +419,8 @@ final class AppModel: ObservableObject {
   func cloneSimulator(_ device: SimulatorDevice, named rawName: String) async {
     guard let backend, !isBusy(device) else { return }
     let name = rawName.trimmingCharacters(in: .whitespacesAndNewlines)
-    setOperation("Cloning apps, data, and service profile…", for: device.udid)
-    record(.info, "Cloning \(device.name) as \(name)")
+    setOperation(tr("Cloning apps, data, and service profile…"), for: device.udid)
+    record(.info, tr("Cloning %@ as %@", device.name, name))
     defer { clearOperation(for: device.udid) }
 
     do {
@@ -422,29 +431,33 @@ final class AppModel: ObservableObject {
       measurements.removeValue(forKey: result.udid)
       record(
         .success,
-        "Cloned \(device.name) as \(result.name ?? name), including its service profile")
+        tr(
+          "Cloned %@ as %@, including its service profile",
+          device.name, result.name ?? name))
       selectedUDIDs = [result.udid]
       await refresh()
     } catch {
       await refresh()
-      recordFailure("Could not clone \(device.name): \(error.localizedDescription)", present: true)
+      recordFailure(
+        tr("Could not clone %@: %@", device.name, error.localizedDescription), present: true)
     }
   }
 
   func renameSimulator(_ device: SimulatorDevice, to rawName: String) async {
     guard let backend, !isBusy(device) else { return }
     let name = rawName.trimmingCharacters(in: .whitespacesAndNewlines)
-    setOperation("Renaming simulator…", for: device.udid)
-    record(.info, "Renaming \(device.name) to \(name)")
+    setOperation(tr("Renaming simulator…"), for: device.udid)
+    record(.info, tr("Renaming %@ to %@", device.name, name))
     defer { clearOperation(for: device.udid) }
 
     do {
       _ = try await backend.rename(udid: device.udid, name: name)
-      record(.success, "Renamed \(device.name) to \(name)")
+      record(.success, tr("Renamed %@ to %@", device.name, name))
       await refresh()
       selectedUDIDs = [device.udid]
     } catch {
-      recordFailure("Could not rename \(device.name): \(error.localizedDescription)", present: true)
+      recordFailure(
+        tr("Could not rename %@: %@", device.name, error.localizedDescription), present: true)
     }
   }
 
@@ -458,32 +471,33 @@ final class AppModel: ObservableObject {
 
   func bootSimulator(_ device: SimulatorDevice) async {
     guard let backend, !isBusy(device) else { return }
-    setOperation("Booting simulator…", for: device.udid)
-    record(.info, "Booting \(device.name)")
+    setOperation(tr("Booting simulator…"), for: device.udid)
+    record(.info, tr("Booting %@", device.name))
     defer { clearOperation(for: device.udid) }
 
     do {
       _ = try await backend.boot(udid: device.udid)
-      record(.success, "Booted \(device.name)")
+      record(.success, tr("Booted %@", device.name))
       await refresh()
     } catch {
-      recordFailure("Could not boot \(device.name): \(error.localizedDescription)", present: true)
+      recordFailure(
+        tr("Could not boot %@: %@", device.name, error.localizedDescription), present: true)
     }
   }
 
   func shutdownSimulator(_ device: SimulatorDevice) async {
     guard let backend, !isBusy(device) else { return }
-    setOperation("Shutting down simulator…", for: device.udid)
-    record(.info, "Shutting down \(device.name)")
+    setOperation(tr("Shutting down simulator…"), for: device.udid)
+    record(.info, tr("Shutting down %@", device.name))
     defer { clearOperation(for: device.udid) }
 
     do {
       _ = try await backend.shutdown(udid: device.udid)
-      record(.success, "Shut down \(device.name)")
+      record(.success, tr("Shut down %@", device.name))
       await refresh()
     } catch {
       recordFailure(
-        "Could not shut down \(device.name): \(error.localizedDescription)", present: true)
+        tr("Could not shut down %@: %@", device.name, error.localizedDescription), present: true)
     }
   }
 
@@ -539,13 +553,14 @@ final class AppModel: ObservableObject {
         return true
       } catch {
         self.recordFailure(
-          "Could not analyze \(device.name): \(error.localizedDescription)", present: false)
+          tr("Could not analyze %@: %@", device.name, error.localizedDescription), present: false)
         return false
       }
     }
 
     if failures == 0 {
-      record(.success, "Disk analysis finished for all \(snapshot.count) selected simulators")
+      record(
+        .success, tr("Disk analysis finished for all %d selected simulators", snapshot.count))
     } else {
       finishBatch(action: "Disk analysis", total: snapshot.count, failures: failures)
     }
@@ -577,11 +592,11 @@ final class AppModel: ObservableObject {
           self.removeCachedDisabled(for: device.udid)
           self.selectedUDIDs.remove(device.udid)
         }
-        self.record(.success, "\(action.pastTenseTitle) \(device.name)")
+        self.record(.success, tr("%@ %@", tr(action.pastTenseTitle), device.name))
         return true
       } catch {
         self.recordFailure(
-          "Could not \(action.verb) \(device.name): \(error.localizedDescription)",
+          tr("Could not %@ %@: %@", tr(action.verb), device.name, error.localizedDescription),
           present: false)
         return false
       }
@@ -595,8 +610,8 @@ final class AppModel: ObservableObject {
     guard let backend else { return false }
     // runConcurrently owns this reservation and clears it; a defer here
     // could wipe a reservation another operation took in the meantime.
-    setOperation("Applying service profile…", for: device.udid)
-    record(.info, "Applying service profile to \(device.name)")
+    setOperation(tr("Applying service profile…"), for: device.udid)
+    record(.info, tr("Applying service profile to %@", device.name))
     do {
       let output = try await backend.slim(
         udid: device.udid,
@@ -605,11 +620,12 @@ final class AppModel: ObservableObject {
         preserveBootState: preserveBootState
       )
       setCachedDisabled(disabledDaemonCount(for: device), for: device.udid)
-      record(.success, "Updated \(device.name): \(summaryLine(output))")
+      record(.success, tr("Updated %@: %@", device.name, summaryLine(output)))
       return true
     } catch {
       recordFailure(
-        "Could not slim \(device.name): \(error.localizedDescription)", present: presentErrors)
+        tr("Could not slim %@: %@", device.name, error.localizedDescription),
+        present: presentErrors)
       return false
     }
   }
@@ -618,17 +634,18 @@ final class AppModel: ObservableObject {
     guard let backend else { return false }
     // runConcurrently owns this reservation and clears it; a defer here
     // could wipe a reservation another operation took in the meantime.
-    setOperation("Restoring stock services…", for: device.udid)
-    record(.info, "Restoring \(device.name) to stock")
+    setOperation(tr("Restoring stock services…"), for: device.udid)
+    record(.info, tr("Restoring %@ to stock", device.name))
     do {
       let output = try await backend.restore(
         udid: device.udid, preserveBootState: preserveBootState)
       setCachedDisabled(0, for: device.udid)
-      record(.success, "Restored \(device.name): \(summaryLine(output))")
+      record(.success, tr("Restored %@: %@", device.name, summaryLine(output)))
       return true
     } catch {
       recordFailure(
-        "Could not restore \(device.name): \(error.localizedDescription)", present: presentErrors)
+        tr("Could not restore %@: %@", device.name, error.localizedDescription),
+        present: presentErrors)
       return false
     }
   }
@@ -684,10 +701,11 @@ final class AppModel: ObservableObject {
 
   private func finishBatch(action: String, total: Int, failures: Int) {
     if failures == 0 {
-      record(.success, "\(action) finished for all \(total) selected simulators")
+      record(.success, tr("%@ finished for all %d selected simulators", action, total))
     } else {
-      let message =
-        "\(action) finished with \(failures) failure\(failures == 1 ? "" : "s") out of \(total). Check Activity for details."
+      let message = tr(
+        "%@ finished with %d failure%@ out of %d. Check Activity for details.",
+        action, failures, failures == 1 ? "" : tr("s"), total)
       recordFailure(message, present: true)
     }
   }
@@ -824,36 +842,36 @@ private enum SimulatorManagementBatch {
 
   var verb: String {
     switch self {
-    case .erase: return "erase"
-    case .delete: return "delete"
+    case .erase: return tr("erase")
+    case .delete: return tr("delete")
     }
   }
 
   var progressTitle: String {
     switch self {
-    case .erase: return "Erasing"
-    case .delete: return "Deleting"
+    case .erase: return tr("Erasing")
+    case .delete: return tr("Deleting")
     }
   }
 
   var operationTitle: String {
     switch self {
-    case .erase: return "Erasing simulator…"
-    case .delete: return "Deleting simulator…"
+    case .erase: return tr("Erasing simulator…")
+    case .delete: return tr("Deleting simulator…")
     }
   }
 
   var pastTenseTitle: String {
     switch self {
-    case .erase: return "Erased"
-    case .delete: return "Deleted"
+    case .erase: return tr("Erased")
+    case .delete: return tr("Deleted")
     }
   }
 
   var completionTitle: String {
     switch self {
-    case .erase: return "Erase"
-    case .delete: return "Deletion"
+    case .erase: return tr("Erase")
+    case .delete: return tr("Deletion")
     }
   }
 }
