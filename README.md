@@ -77,9 +77,16 @@ The SwiftUI app bundles the CLI and adds:
 Build it locally with Go and Xcode:
 
 ```sh
-make app
+make app                       # this machine's architecture
+make app ARCHS=arm64,x86_64    # universal (both architectures)
+make app ARCHS=arm64           # a single architecture
 open build/SimSlim.app
 ```
+
+`ARCHS` accepts `arm64` and/or `x86_64` (comma- or space-separated), or
+`universal` as shorthand for both. Both the app and the bundled `simslim` CLI
+are built for every requested architecture and lipo-joined into one binary;
+omitting `ARCHS` builds only the architecture of the machine running the build.
 
 Memory estimates are guidance rather than additive savings; see the
 [measurement method](docs/category-memory.md). SimSlim recommends cloning before

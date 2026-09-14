@@ -19,8 +19,14 @@ go test -run TestName ./...     # run a single test
 make check                      # full CI gate — must pass before a PR
 make format                     # gofmt + swift-format (run before committing)
 make app                        # build build/SimSlim.app (Go + swiftc, macOS only)
+make app ARCHS=arm64,x86_64     # universal build (default: this machine's arch)
 open build/SimSlim.app
 ```
+
+`make app` forwards `ARCHS` to `scripts/build-app.sh`, which builds one slice
+per requested architecture (`arm64`, `x86_64`, or both; `universal` means both)
+and lipo-joins them, then verifies both bundled Mach-O binaries carry exactly
+those slices. An empty `ARCHS` builds only the build machine's architecture.
 
 `make check` runs `go test`, `go vet`, `swift-format lint --strict --recursive gui`,
 `zsh -n scripts/build-app.sh`, and `plutil -lint gui/Info.plist`. CI (`.github/workflows/ci.yml`)
@@ -163,6 +169,8 @@ other IPC.
 **The SwiftUI app** (`gui/`) has no Xcode project. `scripts/build-app.sh` compiles
 the Swift sources directly with `swiftc`, cross-builds the Go CLI, bundles it into
 `SimSlim.app/Contents/Resources/simslim`, generates the icon, and ad-hoc codesigns.
+Both binaries default to the host architecture; `ARCHS` (see above) adds slices
+that are combined with `lipo` for a universal app.
 The app is a thin front end that shells out to that bundled binary.
 
 ## Safety invariants — preserve these
