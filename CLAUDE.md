@@ -20,6 +20,7 @@ make check                      # full CI gate — must pass before a PR
 make format                     # gofmt + swift-format (run before committing)
 make app                        # build build/SimSlim.app (Go + swiftc, macOS only)
 make app ARCHS=arm64,x86_64     # universal build (default: this machine's arch)
+make app ARCHS=all              # universal + SimSlim-<arch>.app per architecture
 open build/SimSlim.app
 ```
 
@@ -27,10 +28,18 @@ open build/SimSlim.app
 per requested architecture (`arm64`, `x86_64`, or both; `universal` means both)
 and lipo-joins them, then verifies both bundled Mach-O binaries carry exactly
 those slices. An empty `ARCHS` builds only the build machine's architecture.
+`ARCHS=all` also emits one thin bundle per architecture
+(`build/SimSlim-arm64.app`, `build/SimSlim-x86_64.app`) beside the main one.
 
 `make check` runs `go test`, `go vet`, `swift-format lint --strict --recursive gui`,
 `zsh -n scripts/build-app.sh`, and `plutil -lint gui/Info.plist`. CI (`.github/workflows/ci.yml`)
 runs exactly this on macos-26 / Xcode 26.6, then builds and verifies the app bundle.
+
+Releases are automatic: pushing a `v*` tag runs `.github/workflows/release.yml`,
+which builds the app bundles (`ARCHS=all`), the CLI tarball, and the Homebrew
+bottle in parallel jobs, then a `publish` job downloads every artifact, writes
+one `SHA256SUMS.txt` over them, and attaches the lot to a single GitHub release
+for that tag. `workflow_dispatch` with an existing tag re-runs only the bottle.
 
 Tests are pure unit tests (parsing, delta logic, allowlist invariants) — they do
 **not** boot real simulators, so they run anywhere. Only the app build and manual
