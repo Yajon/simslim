@@ -83,7 +83,8 @@ struct SimSlimBackend {
     udid: String,
     exceptCategories: Set<String>,
     keepLabels: Set<String>,
-    preserveBootState: Bool
+    preserveBootState: Bool,
+    osVersion: String
   ) async throws -> String {
     var arguments = ["on"]
     if !exceptCategories.isEmpty {
@@ -93,10 +94,22 @@ struct SimSlimBackend {
       arguments.append(contentsOf: ["--keep", keepLabels.sorted().joined(separator: ",")])
     }
     if preserveBootState {
-      arguments.append("--preserve-boot-state")
+      if supportsPersistentOverrides(osVersion) {
+        arguments.append("--preserve-boot-state")
+      } else {
+        arguments.append("--no-reboot")
+      }
     }
     arguments.append(udid)
     return try await execute(arguments).text
+  }
+
+  private func supportsPersistentOverrides(_ osVersion: String) -> Bool {
+    let components = osVersion.split(separator: ".").compactMap { Int($0) }
+    guard components.count >= 2 else { return false }
+    let major = components[0]
+    let minor = components[1]
+    return major > 18 || (major == 18 && minor >= 5)
   }
 
   func restore(udid: String, preserveBootState: Bool) async throws -> String {

@@ -617,7 +617,8 @@ final class AppModel: ObservableObject {
         udid: device.udid,
         exceptCategories: keptCategoryIDs,
         keepLabels: keptServiceLabels,
-        preserveBootState: preserveBootState
+        preserveBootState: preserveBootState,
+        osVersion: device.osVersion
       )
       setCachedDisabled(disabledDaemonCount(for: device), for: device.udid)
       record(.success, tr("Updated %@: %@", device.name, summaryLine(output)))
