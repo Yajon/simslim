@@ -501,6 +501,37 @@ final class AppModel: ObservableObject {
     }
   }
 
+  /// Opens the device's window in Simulator.app. All device windows belong to
+  /// one shared Simulator.app process, so an already-running instance is only
+  /// brought forward — launching it again would be a duplicate start.
+  func openSimulator(_ device: SimulatorDevice) async {
+    guard !isBusy(device) else { return }
+
+    if SimulatorAppLauncher.isRunning {
+      SimulatorAppLauncher.activateRunningInstance()
+      record(
+        .info,
+        tr(
+          "Simulator is already running; brought it to the front instead of opening %@ again",
+          device.name))
+      return
+    }
+
+    setOperation(tr("Opening simulator…"), for: device.udid)
+    record(.info, tr("Opening %@ in Simulator", device.name))
+    defer { clearOperation(for: device.udid) }
+
+    do {
+      try await SimulatorAppLauncher.open(deviceUDID: device.udid)
+      record(.success, tr("Opened %@ in Simulator", device.name))
+      await refresh()
+    } catch {
+      recordFailure(
+        tr("Could not open %@ in Simulator: %@", device.name, error.localizedDescription),
+        present: true)
+    }
+  }
+
   func clearActivity() {
     activity.removeAll()
   }

@@ -1,3 +1,4 @@
+import AppKit
 import Foundation
 
 enum BackendError: LocalizedError {
@@ -15,6 +16,74 @@ enum BackendError: LocalizedError {
       return tr("%@ exited with status %d.\n\n%@", command, exitCode, output)
     case .invalidResponse(let command, let detail):
       return tr("Could not read the response from simslim %@: %@", command, detail)
+    }
+  }
+}
+
+enum SimulatorAppLaunchError: LocalizedError {
+  case launchFailed(status: Int32, output: String)
+
+  var errorDescription: String? {
+    switch self {
+    case .launchFailed(let status, let output):
+      return tr("open -a Simulator exited with status %d.\n\n%@", status, output)
+    }
+  }
+}
+
+/// Launches the shared Simulator.app process behind the row menu's "Open
+/// Simulator" action. Every device window lives in that one instance, so the
+/// caller checks `isRunning` first and never launches a second copy.
+enum SimulatorAppLauncher {
+  private static let bundleIdentifier = "com.apple.iphonesimulator"
+
+  private static var runningInstance: NSRunningApplication? {
+    NSWorkspace.shared.runningApplications.first {
+      $0.bundleIdentifier == bundleIdentifier && !$0.isTerminated
+    }
+  }
+
+  static var isRunning: Bool { runningInstance != nil }
+
+  /// Gives the action a visible effect when no new launch is allowed.
+  static func activateRunningInstance() {
+    guard let app = runningInstance else { return }
+    _ = app.activate(options: [.activateIgnoringOtherApps])
+  }
+
+  /// `open -a Simulator`, with `-CurrentDeviceUDID` so a cold launch shows the
+  /// row's device instead of the last one Simulator.app remembers. `open`
+  /// ignores launch arguments for a running app, hence the `isRunning` gate.
+  static func open(deviceUDID: String) async throws {
+    try await withCheckedThrowingContinuation { continuation in
+      DispatchQueue.global(qos: .userInitiated).async {
+        let process = Process()
+        let output = Pipe()
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/open")
+        process.arguments = ["-a", "Simulator", "--args", "-CurrentDeviceUDID", deviceUDID]
+        process.standardInput = FileHandle.nullDevice
+        process.standardOutput = output
+        process.standardError = output
+
+        do {
+          try process.run()
+          try? output.fileHandleForWriting.close()
+          let data = output.fileHandleForReading.readDataToEndOfFile()
+          process.waitUntilExit()
+
+          if process.terminationStatus == 0 {
+            continuation.resume(returning: ())
+          } else {
+            continuation.resume(
+              throwing: SimulatorAppLaunchError.launchFailed(
+                status: process.terminationStatus,
+                output: String(decoding: data, as: UTF8.self)
+                  .trimmingCharacters(in: .whitespacesAndNewlines)))
+          }
+        } catch {
+          continuation.resume(throwing: error)
+        }
+      }
     }
   }
 }

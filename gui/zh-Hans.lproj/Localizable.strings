@@ -160,6 +160,7 @@
 "Deselect Simulator" = "取消选择模拟器";
 "Select Simulator" = "选择模拟器";
 "Shut Down Simulator" = "关闭模拟器";
+"Open Simulator" = "打开模拟器";
 
 /* Activity panel */
 
@@ -194,6 +195,7 @@
 "Renaming simulator…" = "正在重命名模拟器…";
 "Booting simulator…" = "正在启动模拟器…";
 "Shutting down simulator…" = "正在关闭模拟器…";
+"Opening simulator…" = "正在打开模拟器…";
 "Applying service profile…" = "正在应用服务配置…";
 "Restoring stock services…" = "正在恢复原厂服务…";
 "Pending" = "待完成";
@@ -225,6 +227,10 @@
 "Shutting down %@" = "正在关闭 %@";
 "Shut down %@" = "已关闭 %@";
 "Could not shut down %@: %@" = "无法关闭 %@：%@";
+"Opening %@ in Simulator" = "正在打开 %@ 的模拟器窗口";
+"Opened %@ in Simulator" = "已打开 %@ 的模拟器窗口";
+"Could not open %@ in Simulator: %@" = "无法打开 %@ 的模拟器窗口：%@";
+"Simulator is already running; brought it to the front instead of opening %@ again" = "模拟器已在运行，已切换到前台，未重复打开 %@";
 "Could not analyze %@: %@" = "无法分析 %@：%@";
 "Could not %@ %@: %@" = "无法%@ %@：%@";
 "Could not %@ %@" = "无法%@%@";
@@ -240,6 +246,7 @@
 "%@ finished with %d failure%@ out of %d. Check Activity for details." = "%@ 完成，%d 个所选模拟器中有 %d 项失败。详情请查看“活动”。";
 "Refresh failed: %@" = "刷新失败：%@";
 "%@ exited with status %d.\n\n%@" = "%@ 退出，状态码为 %d。\n\n%@";
+"open -a Simulator exited with status %d.\n\n%@" = "open -a Simulator 退出，状态码为 %d。\n\n%@";
 "%d %@?" = "%d %@？";
 "Permanently Clean %d Simulator%@?" = "永久清理 %d 个模拟器%@？";
 

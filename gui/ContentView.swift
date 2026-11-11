@@ -1360,6 +1360,13 @@ private struct SimulatorRow: View {
                 Label(tr("Boot Simulator"), systemImage: "play.fill")
               }
             }
+
+            Button {
+              Task { await model.openSimulator(device) }
+            } label: {
+              Label(tr("Open Simulator"), systemImage: "macwindow")
+            }
+            .disabled(model.isBusy(device))
           }
 
           Section(tr("Service Profile")) {
