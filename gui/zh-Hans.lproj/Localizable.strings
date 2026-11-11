@@ -162,6 +162,14 @@
 "Shut Down Simulator" = "关闭模拟器";
 "Open Simulator" = "打开模拟器";
 
+/* About window */
+
+"About SimSlim" = "关于 SimSlim";
+"Close" = "关闭";
+"Copyright © %d GuoYanjun" = "Copyright © %d GuoYanjun";
+"Open in your browser" = "在浏览器中打开";
+"About page is unavailable" = "关于页面不可用";
+
 /* Activity panel */
 
 "Activity" = "活动";

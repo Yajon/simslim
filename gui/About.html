@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SimSlim · 关于</title>
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #0b1526;
+    --panel: #11203a;
+    --panel-2: #0e1a30;
+    --ink: #e9f1ff;
+    --muted: #94a9c8;
+    --faint: #63799b;
+    --line: rgba(147, 180, 226, .16);
+    --grid: rgba(147, 180, 226, .10);
+    --green: #5be08a;
+    --cyan: #5ac8fa;
+    --blue: #6c8cff;
+    --stock: linear-gradient(90deg, #3a5a91, #6f8fc4);
+    --slim: linear-gradient(90deg, #2e9f6a, #5be08a);
+    --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif;
+  }
+
+  @media (prefers-color-scheme: light) {
+    :root {
+      color-scheme: light;
+      --bg: #f2f6fd;
+      --panel: #ffffff;
+      --panel-2: #eaf1fb;
+      --ink: #14213b;
+      --muted: #52668a;
+      --faint: #7c8fae;
+      --line: rgba(31, 65, 115, .14);
+      --grid: rgba(31, 65, 115, .09);
+      --green: #0d8a4c;
+      --cyan: #0a7fb5;
+      --blue: #3b5fd9;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page { max-width: 760px; margin: 0 auto; padding: 34px 32px 28px; }
+
+  .eyebrow {
+    font: 600 10px/1.4 var(--mono);
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--green);
+  }
+
+  h1 {
+    margin: 10px 0 4px;
+    font-size: clamp(34px, 6vw, 48px);
+    font-weight: 750;
+    letter-spacing: -.045em;
+    line-height: 1.1;
+  }
+
+  .lede {
+    margin: 0;
+    max-width: 44em;
+    font-size: 15px;
+    color: var(--muted);
+  }
+
+  .masthead { padding-bottom: 26px; border-bottom: 1px solid var(--line); }
+
+  /* Signature: the before/after memory gauge, drawn like an instrument bar. */
+  .compare {
+    margin-top: 26px;
+    padding: 20px 20px 16px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+  }
+  .compare-head {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+    margin-bottom: 18px;
+  }
+  .compare-head strong { font-size: 13px; font-weight: 650; }
+  .compare-head span { font: 11px var(--mono); color: var(--faint); }
+  .compare-row {
+    display: grid;
+    grid-template-columns: 52px 1fr 74px;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .compare-label { font: 600 11px var(--mono); color: var(--muted); }
+  .track {
+    position: relative;
+    height: 16px;
+    border-radius: 5px;
+    background:
+      repeating-linear-gradient(90deg, var(--grid) 0 1px, transparent 1px 12.5%),
+      var(--panel-2);
+    overflow: hidden;
+  }
+  .fill {
+    height: 100%;
+    border-radius: 5px;
+    transform-origin: left center;
+    animation: grow .95s cubic-bezier(.2, .8, .2, 1);
+    animation-delay: .28s;
+  }
+  .fill.stock { width: 100%; background: var(--stock); }
+  .fill.slim {
+    width: 22.5%;
+    background: var(--slim);
+    box-shadow: 0 0 18px rgba(91, 224, 138, .35);
+    animation-delay: .42s;
+  }
+  .compare-value {
+    font: 600 12px var(--mono);
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+  .compare-row.slimmed .compare-value { color: var(--green); }
+  .compare-axis {
+    display: flex; justify-content: space-between;
+    margin: 2px 74px 0 64px;
+    font: 10px var(--mono); color: var(--faint);
+  }
+  .compare-note { margin: 16px 0 0; font-size: 11.5px; color: var(--faint); }
+
+  section { padding: 28px 0 4px; }
+  .kicker {
+    display: block;
+    font: 600 10px/1.4 var(--mono);
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--cyan);
+  }
+  h2 {
+    margin: 6px 0 16px;
+    font-size: 21px;
+    font-weight: 700;
+    letter-spacing: -.02em;
+  }
+  .prose p { margin: 0 0 12px; color: var(--muted); max-width: 50em; }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-top: 20px;
+  }
+  .stat {
+    padding: 14px 14px 12px;
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+  }
+  .stat b {
+    display: block;
+    font: 700 20px/1.2 var(--mono);
+    letter-spacing: -.04em;
+    font-variant-numeric: tabular-nums;
+  }
+  .stat b em { font-style: normal; color: var(--green); }
+  .stat span { display: block; margin-top: 7px; font-size: 11px; color: var(--faint); }
+
+  .steps { list-style: none; margin: 0; padding: 0; }
+  .steps li {
+    display: grid;
+    grid-template-columns: 38px 1fr;
+    gap: 14px;
+    padding: 14px 0;
+    border-top: 1px solid var(--line);
+  }
+  .steps li:last-child { border-bottom: 1px solid var(--line); }
+  .step-num { font: 600 12px/1.9 var(--mono); color: var(--green); }
+  .steps h3 { margin: 0 0 4px; font-size: 14px; font-weight: 650; }
+  .steps p { margin: 0; font-size: 12.5px; color: var(--muted); }
+  code {
+    font: 11.5px var(--mono);
+    padding: 1px 5px;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    background: var(--panel-2);
+  }
+
+  .faq { border-top: 1px solid var(--line); }
+  details { border-bottom: 1px solid var(--line); }
+  summary {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 13px 4px;
+    font-weight: 620;
+    cursor: pointer;
+    list-style: none;
+    outline-offset: -2px;
+  }
+  summary::-webkit-details-marker { display: none; }
+  summary:hover { color: var(--green); }
+  summary:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); border-radius: 4px; }
+  .chev {
+    margin-left: auto;
+    flex: none;
+    width: 20px;
+    height: 20px;
+    padding: 4px;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    background: var(--panel-2);
+    color: var(--green);
+    transition: transform .22s ease, border-color .2s ease;
+  }
+  summary:hover .chev { border-color: var(--green); }
+  /* Open rows point up (click to collapse), closed rows point down. */
+  details[open] summary .chev { transform: rotate(180deg); }
+  .answer {
+    padding: 0 30px 15px 4px;
+    font-size: 12.5px;
+    color: var(--muted);
+  }
+
+  .page-footer {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+    gap: 10px;
+    margin-top: 30px; padding-top: 16px;
+    border-top: 1px solid var(--line);
+    font-size: 11.5px; color: var(--faint);
+  }
+  .page-footer a { color: var(--green); text-decoration: none; font: 600 11.5px var(--mono); }
+  .page-footer a:hover { text-decoration: underline; }
+
+  @keyframes grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
+  @media (max-width: 620px) {
+    .page { padding: 24px 18px; }
+    .stats { grid-template-columns: 1fr; }
+    .compare { padding: 16px 14px; }
+    .compare-row { grid-template-columns: 42px 1fr 64px; gap: 8px; }
+    .compare-axis { margin: 2px 64px 0 50px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="masthead">
+    <div class="eyebrow" data-en="DEVELOPER UTILITY · macOS 13+">开发者工具 · macOS 13+</div>
+    <h1>SimSlim</h1>
+    <p class="lede" data-en="Run more iOS, tvOS, watchOS and visionOS simulators on one Mac by switching off the background daemons a simulator never needs.">通过关闭模拟器用不到的后台守护进程，让一台 Mac 同时跑更多 iOS、tvOS、watchOS 与 visionOS 模拟器。</p>
+
+    <div class="compare">
+      <div class="compare-head">
+        <strong data-en="Idle memory of one device">单台设备的静置内存</strong>
+        <span data-en="phys_footprint · M1 Pro 16 GB">phys_footprint · M1 Pro 16 GB</span>
+      </div>
+      <div class="compare-row">
+        <span class="compare-label" data-en="STOCK">原生</span>
+        <div class="track"><div class="fill stock"></div></div>
+        <span class="compare-value">4.0 GB</span>
+      </div>
+      <div class="compare-row slimmed">
+        <span class="compare-label" data-en="SLIM">瘦身</span>
+        <div class="track"><div class="fill slim"></div></div>
+        <span class="compare-value">0.9 GB</span>
+      </div>
+      <div class="compare-axis"><span>0</span><span>1</span><span>2</span><span>3</span><span>4 GB</span></div>
+      <p class="compare-note" data-en="Same device, same idle time. The stock simulator starts about 258 processes; the slimmed one starts 70.">同一台设备、相同静置时间。原生状态约 258 个进程，瘦身后约 70 个。</p>
+    </div>
+  </header>
+
+  <section>
+    <span class="kicker" data-en="OVERVIEW">概览</span>
+    <h2 data-en="What it does">项目介绍</h2>
+    <div class="prose">
+      <p data-en="A freshly booted iOS simulator starts roughly 180 background services — Siri, Spotlight indexing, photo analysis, News, wallpaper scenes, iCloud sync. Most of them do nothing for development, testing or CI.">一个新启动的 iOS 模拟器会拉起约 180 个后台服务：Siri、聚焦索引、照片分析、新闻、锁屏壁纸、iCloud 同步……做开发、测试或 CI 时，这些大多用不上。</p>
+      <p data-en="SimSlim disables allowlisted daemons per device so each simulator uses about a quarter of its usual memory. Core workflow and deadlock-prone services are never touched, every change can be restored, and the host Mac is left alone. All work goes through xcrun simctl.">SimSlim 按设备停用允许清单内的守护进程，把单机内存降到约 1/4。核心工作流与容易导致死锁的服务永不停用，改动随时可以恢复，宿主机不受影响。所有操作都经由 xcrun simctl 完成。</p>
+    </div>
+    <div class="stats">
+      <div class="stat">
+        <b>258 <em>→ 70</em></b>
+        <span data-en="Processes at idle">静置时的进程数</span>
+      </div>
+      <div class="stat">
+        <b>4.0 <em>→ 0.9</em> GB</b>
+        <span data-en="Memory per device (phys_footprint)">单设备内存（phys_footprint）</span>
+      </div>
+      <div class="stat">
+        <b>12</b>
+        <span data-en="Slimmed simulators at once on a 16 GB M1 Pro">16 GB M1 Pro 上同时运行的瘦身模拟器</span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="kicker" data-en="WORKFLOW">工作流</span>
+    <h2 data-en="Getting started">使用简介</h2>
+    <ol class="steps">
+      <li>
+        <div class="step-num">01</div>
+        <div>
+          <h3 data-en="Pick your simulators">选择模拟器</h3>
+          <p data-en="The list shows name, UDID, platform and OS version, boot state, service state, disk size and live RAM. Search by name, UDID or version, and select one or several rows.">列表展示名称、UDID、平台与系统版本、启动状态、服务状态、磁盘占用和实时内存；可按名称、UDID 或版本搜索，支持多选。</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">02</div>
+        <div>
+          <h3 data-en="Keep only the features you need">挑选要保留的能力</h3>
+          <p data-en="The sidebar groups services by feature — Siri, search, push, iCloud and more. Tick the capabilities your tests need; the rest are disabled. Switch the segmented control to Disk Size for a read-only cleanup analysis.">左侧按能力分组列出服务：Siri、搜索、推送、iCloud 等。勾选测试需要的能力，其余会被停用；切换顶部的“磁盘占用”可做只读的清理分析。</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">03</div>
+        <div>
+          <h3 data-en="Apply, then check the state">应用并核对状态</h3>
+          <p data-en="Slim applies the profile and reads it back; Unslim re-enables every SimSlim-managed service. The row menu also clones, renames, erases, deletes, and reveals device folders in Finder.">“瘦身”应用配置并读回状态；“恢复”把 SimSlim 管理的服务全部重新启用。行菜单还可以克隆、重命名、抹掉、删除，或在访达中打开设备目录。</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">04</div>
+        <div>
+          <h3 data-en="Use them day to day">日常使用</h3>
+          <p data-en="Boot and shut down from the toolbar, or choose Open Simulator in the row menu to show a device window in Simulator.app. Refresh and Refresh RAM update the columns.">用工具栏启动 / 关机设备，或在行菜单里选“打开模拟器”，用 Simulator.app 显示设备窗口；“刷新”与“刷新内存”更新列表。</p>
+        </div>
+      </li>
+    </ol>
+  </section>
+
+  <section>
+    <span class="kicker" data-en="QUESTIONS">答疑</span>
+    <h2 data-en="Common questions">相关问题</h2>
+    <span data-en="All actions are scoped to the exact device you select.">所有操作只作用于当前选中的设备</span>
+    <div class="faq">
+      <details open>
+        <summary><span data-en="Is slimming reversible?">瘦身可以恢复吗？</span><svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 6.25 8 10.75 12.5 6.25" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+        <div class="answer" data-en="Yes. Unslim re-enables every SimSlim-managed daemon, and a clone preserves the current apps, data, settings and service profile before any destructive cleanup.">可以。“恢复”会重新启用所有 SimSlim 管理的服务；在执行抹掉或清理前，也可以先克隆一份，保留应用、数据、设置和当前服务配置。</div>
+      </details>
+      <details open>
+        <summary><span data-en="Can it break my tests?">会影响我的测试吗？</span><svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 6.25 8 10.75 12.5 6.25" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+        <div class="answer" data-en="Keep the features your tests rely on in the sidebar before applying. Core workflow and deadlock-prone daemons are never disabled; watchOS keeps homed and visionOS keeps mobileassetd. doctor &lt;udid&gt; --requires … checks a booted device against the features you name.">应用前在左侧勾选测试依赖的能力即可。核心工作流与容易导致死锁的服务永不停用；watchOS 保留 homed，visionOS 保留 mobileassetd。也可用 doctor 命令按功能检查已启动的设备。</div>
+      </details>
+      <details open>
+        <summary><span data-en="Why does service state say “unknown while shutdown”?">为什么关机时服务状态显示“未知”？</span><svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 6.25 8 10.75 12.5 6.25" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+        <div class="answer" data-en="launchd overrides can only be read while a device is booted. A shut-down device shows the last cached value instead, so boot it and refresh to see the live state.">launchd 的覆盖项只能在设备启动时读取。关机设备显示的是上次缓存的状态；启动设备后刷新即可看到实时状态。</div>
+      </details>
+      <details open>
+        <summary><span data-en="Do the overrides survive a reboot?">重启后配置还在吗？</span><svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 6.25 8 10.75 12.5 6.25" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+        <div class="answer" data-en="iOS/tvOS 18.5, watchOS 11.5 and visionOS 2.5 or newer persist overrides. Older runtimes only hold them for the current boot session; verify &lt;udid&gt; --profile … reports any drift.">iOS/tvOS 18.5、watchOS 11.5、visionOS 2.5 及以上支持持久化覆盖项；更早的运行时仅在本次启动期间生效。可用 verify 命令检查配置偏差。</div>
+      </details>
+      <details open>
+        <summary><span data-en="What is the difference between Boot and Open Simulator?">“启动模拟器”和“打开模拟器”有什么区别？</span><svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 6.25 8 10.75 12.5 6.25" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+        <div class="answer" data-en="Boot starts the device in the background with no window. Open Simulator launches Simulator.app on the row's device; if Simulator.app is already running it is simply brought to the front, never started twice.">“启动模拟器”只让设备在后台运行，不显示窗口；“打开模拟器”会用 Simulator.app 打开这一行设备的窗口。若 Simulator.app 已在运行，只会把它切到前台，不会重复启动。</div>
+      </details>
+      <details open>
+        <summary><span data-en="Is disk cleanup safe?">磁盘清理安全吗？</span><svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 6.25 8 10.75 12.5 6.25" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+        <div class="answer" data-en="Disk analysis is read-only. Cleanup needs a confirmation, removes only allowlisted per-device directories, and never touches the shared signed runtime, Documents, app bundles or user media.">磁盘分析是只读的。清理需要二次确认，只删除每个设备允许清单内的目录，不会动共享的签名运行时，也不会删除文稿、应用包和用户媒体。</div>
+      </details>
+      <details open>
+        <summary><span data-en="Why does it need Xcode?">为什么需要 Xcode？</span><svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 6.25 8 10.75 12.5 6.25" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+        <div class="answer" data-en="Every operation is driven by xcrun simctl, so a Mac with Xcode and an installed iOS, tvOS, watchOS or visionOS runtime is required. The app itself runs on macOS 13 or later.">所有操作都由 xcrun simctl 驱动，因此需要装有 Xcode 及 iOS、tvOS、watchOS 或 visionOS 模拟器运行时；本应用要求 macOS 13 及以上。</div>
+      </details>
+      <details open>
+        <summary><span data-en="Can I use the command line instead?">能用命令行操作吗？</span><svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 6.25 8 10.75 12.5 6.25" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+        <div class="answer" data-en="Yes. The app bundles the simslim CLI: on/off apply and restore profiles, status/verify check them, measure reports live memory, and top watches the whole fleet. Toolbar Language switches both interfaces.">可以。应用内置了 simslim 命令行：on/off 应用与恢复配置，status/verify 检查状态，measure 查看实时内存，top 监控整组设备。工具栏的 Language 菜单会同时切换两端的语言。</div>
+      </details>
+    </div>
+  </section>
+
+  <footer class="page-footer">
+    <a href="https://yajon.github.io/" data-en="yajon.github.io ↗">GuoYanjun ↗</a>
+  </footer>
+
+</div>
+<script>
+  (function () {
+    var lang = window.SIMSLIM_LANG || 'zh-Hans';
+    if (lang === 'en') {
+      document.documentElement.lang = 'en';
+      document.title = 'SimSlim — About';
+      document.querySelectorAll('[data-en]').forEach(function (el) {
+        el.textContent = el.getAttribute('data-en');
+      });
+    }
+  })();
+</script>
+</body>
+</html>

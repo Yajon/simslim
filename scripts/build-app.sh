@@ -35,6 +35,12 @@ if [[ ! -f "$ICON_SOURCE" ]]; then
   exit 1
 fi
 
+ABOUT_PAGE="$ROOT_DIR/gui/About.html"
+if [[ ! -f "$ABOUT_PAGE" ]]; then
+  echo "About page is missing: $ABOUT_PAGE" >&2
+  exit 1
+fi
+
 # ARCHS selects the architectures bundled into SimSlim.app. It accepts one or
 # more of arm64 / x86_64 separated by commas or spaces, `universal` as
 # shorthand for both, and `all` for both plus one thin bundle per architecture
@@ -122,6 +128,7 @@ STAGED_APP="$STAGING_DIR/SimSlim.app"
 
 mkdir -p "$STAGED_APP/Contents/MacOS" "$STAGED_APP/Contents/Resources"
 cp "$ROOT_DIR/gui/Info.plist" "$STAGED_APP/Contents/Info.plist"
+cp "$ABOUT_PAGE" "$STAGED_APP/Contents/Resources/About.html"
 plutil -replace CFBundleShortVersionString -string "$APP_VERSION" "$STAGED_APP/Contents/Info.plist"
 plutil -replace CFBundleVersion -string "$BUILD_NUMBER" "$STAGED_APP/Contents/Info.plist"
 
@@ -189,6 +196,7 @@ SWIFT_SOURCES=(
   "$ROOT_DIR/gui/Backend.swift"
   "$ROOT_DIR/gui/Localization.swift"
   "$ROOT_DIR/gui/AppModel.swift"
+  "$ROOT_DIR/gui/AboutView.swift"
   "$ROOT_DIR/gui/SimulatorManagementViews.swift"
   "$ROOT_DIR/gui/ContentView.swift"
   "$ROOT_DIR/gui/SimSlimApp.swift"
@@ -205,6 +213,7 @@ for arch in "${SELECTED_ARCHS[@]}"; do
     -module-name SimSlimApp \
     -framework AppKit \
     -framework SwiftUI \
+    -framework WebKit \
     "${SWIFT_SOURCES[@]}" \
     -o "$slice"
   SWIFT_SLICES+=("$slice")

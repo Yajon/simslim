@@ -648,19 +648,56 @@ private struct MetricPill: View {
   }
 }
 
-private struct ProfileSidebar: View {
-  @EnvironmentObject private var model: AppModel
-  @Binding var mode: SlimmingMode
-  @State private var serviceSearchText = ""
+/// The sidebar app icon doubles as the About entry point. A slow gradient arc
+/// around it signals that the icon is interactive without hiding the artwork.
+private struct AboutIconButton: View {
+  @State private var isRotating = false
+  @State private var isHovered = false
+  let action: () -> Void
 
   var body: some View {
-    VStack(spacing: 0) {
-      HStack(spacing: 12) {
+    Button(action: action) {
+      ZStack {
+        Circle()
+          .stroke(
+            AngularGradient(
+              colors: [.blue.opacity(0), .blue, .cyan, .green, .green.opacity(0)],
+              center: .center),
+            lineWidth: 2.5)
+          .opacity(isHovered ? 1 : 0.8)
+          .rotationEffect(.degrees(isRotating ? 360 : 0))
+          .animation(
+            .linear(duration: 5).repeatForever(autoreverses: false), value: isRotating)
         Image(nsImage: NSApplication.shared.applicationIconImage)
           .resizable()
           .interpolation(.high)
           .scaledToFit()
           .frame(width: 46, height: 46)
+          .scaleEffect(isHovered ? 1.06 : 1)
+          .animation(.easeInOut(duration: 0.18), value: isHovered)
+      }
+      .frame(width: 60, height: 60)
+      .contentShape(Circle())
+    }
+    .buttonStyle(.plain)
+    .modifier(PointingHandCursor())
+    .onHover { isHovered = $0 }
+    .onAppear { isRotating = true }
+    .help(tr("About SimSlim"))
+    .accessibilityLabel(tr("About SimSlim"))
+  }
+}
+
+private struct ProfileSidebar: View {
+  @EnvironmentObject private var model: AppModel
+  @Binding var mode: SlimmingMode
+  @State private var serviceSearchText = ""
+  @State private var showsAbout = false
+
+  var body: some View {
+    VStack(spacing: 0) {
+      HStack(spacing: 12) {
+        AboutIconButton { showsAbout = true }
         VStack(alignment: .leading, spacing: 2) {
           Text("SimSlim")
             .font(.title2.bold())
@@ -696,6 +733,9 @@ private struct ProfileSidebar: View {
       }
     }
     .background(.regularMaterial)
+    .sheet(isPresented: $showsAbout) {
+      AboutView()
+    }
   }
 
   private var sortedMemoryCategories: [SlimCategory] {
