@@ -29,3 +29,15 @@ jobs:
           test "$(plutil -extract CFBundleShortVersionString raw build/SimSlim.app/Contents/Info.plist)" = "0.0.0"
           test "$(plutil -extract CFBundleVersion raw build/SimSlim.app/Contents/Info.plist)" = "$GITHUB_RUN_NUMBER"
           test "$(build/SimSlim.app/Contents/Resources/simslim --version)" = "simslim 0.0.0"
+      - name: Verify localized CLI
+        run: |
+          # SIMSLIM_LANG has top priority, so the runner's own locale cannot
+          # decide the result. Cover both translation paths: the whole help
+          # text and the table-driven per-string lookups.
+          cli=build/SimSlim.app/Contents/Resources/simslim
+          SIMSLIM_LANG=zh-Hans "$cli" --help | grep -F '用法' >/dev/null
+          SIMSLIM_LANG=zh-Hans "$cli" profiles | grep -F '小组件与壁纸' >/dev/null
+          SIMSLIM_LANG=en "$cli" --help | grep -F 'USAGE' >/dev/null
+          en_json="$(SIMSLIM_LANG=en "$cli" profiles --json)"
+          zh_json="$(SIMSLIM_LANG=zh-Hans "$cli" profiles --json)"
+          test "$en_json" = "$zh_json"

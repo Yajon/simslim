@@ -48,6 +48,20 @@ jobs:
             plutil -lint "$bundle/Contents/Info.plist"
             echo "$bundle app=$(lipo -archs "$bundle/Contents/MacOS/SimSlim") cli=$(lipo -archs "$bundle/Contents/Resources/simslim")"
           done
+      - name: Verify localized CLI in every bundle
+        run: |
+          # A thin bundle has its own CLI slice; check each one so a bad lipo
+          # or a missing translation table cannot slip into just one artifact.
+          for bundle in build/SimSlim*.app; do
+            cli="$bundle/Contents/Resources/simslim"
+            SIMSLIM_LANG=zh-Hans "$cli" --help | grep -F '用法' >/dev/null
+            SIMSLIM_LANG=zh-Hans "$cli" profiles | grep -F '小组件与壁纸' >/dev/null
+            SIMSLIM_LANG=en "$cli" --help | grep -F 'USAGE' >/dev/null
+            en_json="$(SIMSLIM_LANG=en "$cli" profiles --json)"
+            zh_json="$(SIMSLIM_LANG=zh-Hans "$cli" profiles --json)"
+            test "$en_json" = "$zh_json"
+            echo "$bundle: CLI localization OK"
+          done
       - name: Package
         run: |
           cd build
@@ -84,6 +98,15 @@ jobs:
           codesign --force --sign - simslim
           tar -czf "simslim-${SIMSLIM_RELEASE_TAG}-macos-arm64.tar.gz" simslim
           shasum -a 256 "simslim-${SIMSLIM_RELEASE_TAG}-macos-arm64.tar.gz"
+      - name: Verify localized CLI
+        run: |
+          # Validate the signed binary that actually goes into the tarball.
+          SIMSLIM_LANG=zh-Hans ./simslim --help | grep -F '用法' >/dev/null
+          SIMSLIM_LANG=zh-Hans ./simslim profiles | grep -F '小组件与壁纸' >/dev/null
+          SIMSLIM_LANG=en ./simslim --help | grep -F 'USAGE' >/dev/null
+          en_json="$(SIMSLIM_LANG=en ./simslim profiles --json)"
+          zh_json="$(SIMSLIM_LANG=zh-Hans ./simslim profiles --json)"
+          test "$en_json" = "$zh_json"
       - uses: actions/upload-artifact@v4
         with:
           name: cli

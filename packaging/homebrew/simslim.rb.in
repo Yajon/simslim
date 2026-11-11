@@ -17,5 +17,19 @@ class Simslim < Formula
 
   test do
     assert_match version.to_s, shell_output("#{bin}/simslim --version")
+
+    # popen_read_text force-encodes command output to Encoding.default_external
+    # (US-ASCII on some runners), which breaks assert_match against a UTF-8
+    # string. Match the Chinese bytes inside the shell and assert on an ASCII
+    # marker instead. This also covers the help text, the translation table,
+    # the English fallback, and the language-independent --json output.
+    assert_match "localization OK", shell_output(<<~SH)
+      cli="#{bin}/simslim"
+      SIMSLIM_LANG=zh-Hans "$cli" --help | /usr/bin/grep -F '用法' >/dev/null || exit 1
+      SIMSLIM_LANG=zh-Hans "$cli" profiles | /usr/bin/grep -F '小组件与壁纸' >/dev/null || exit 1
+      SIMSLIM_LANG=en "$cli" --help | /usr/bin/grep -F 'USAGE' >/dev/null || exit 1
+      test "$(SIMSLIM_LANG=en "$cli" profiles --json)" = "$(SIMSLIM_LANG=zh-Hans "$cli" profiles --json)" || exit 1
+      echo "localization OK"
+    SH
   end
 end
