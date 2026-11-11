@@ -185,6 +185,12 @@ struct SimSlimBackend {
         process.standardInput = FileHandle.nullDevice
         process.standardOutput = combinedOutput
         process.standardError = combinedOutput
+        // The bundled CLI prints human-readable progress on stderr. Pin it to
+        // the language this UI was built with, not the launching shell's locale.
+        // --json output is never localized, so decoding stays unaffected.
+        var environment = ProcessInfo.processInfo.environment
+        environment["SIMSLIM_LANG"] = Localization.shared.language.rawValue
+        process.environment = environment
 
         do {
           try process.run()

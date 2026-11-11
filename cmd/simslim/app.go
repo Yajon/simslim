@@ -141,7 +141,7 @@ func newApp() *cli.Command {
 		},
 		Action: func(_ context.Context, cmd *cli.Command) error {
 			if args := cmd.Args().Slice(); len(args) > 0 {
-				fmt.Fprintf(os.Stderr, "unknown command %q\n\n", args[0])
+				fmt.Fprintf(os.Stderr, tr("unknown command %q\n\n"), args[0])
 			}
 			usage()
 			os.Exit(2)

@@ -522,8 +522,7 @@ func applyDelta(ctx context.Context, set, udid string, toDisable, toEnable []str
 	var failures []string
 	for pass := 1; pass <= applyPasses && len(pending) > 0; pass++ {
 		if pass > 1 {
-			report.report(fmt.Sprintf("  retrying %d failed services (pass %d/%d)...",
-				len(pending), pass, applyPasses))
+			report.report(TR("  retrying %d failed services (pass %d/%d)...", len(pending), pass, applyPasses))
 			// Give a launchd that refused the spawns (still starting, or
 			// briefly unavailable) a moment before asking it again.
 			if n := len(launchdRetryDelays); n > 0 {
@@ -570,7 +569,7 @@ func applyDelta(ctx context.Context, set, udid string, toDisable, toEnable []str
 			}
 			done++
 			if done == total || done%20 == 0 {
-				report.report(fmt.Sprintf("  %d/%d services updated", done, total))
+				report.report(TR("  %d/%d services updated", done, total))
 			}
 		}
 		if ctx.Err() != nil {

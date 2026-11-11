@@ -355,20 +355,20 @@ func (m topModel) fleetView() string {
 		return b.String()
 	}
 	if !m.loaded {
-		b.WriteString(topFaintStyle.Render("Loading booted simulators…"))
+		b.WriteString(topFaintStyle.Render(tr("Loading booted simulators…")))
 		b.WriteByte('\n')
 		return b.String()
 	}
 	if len(m.sims) == 0 {
-		b.WriteString(topFaintStyle.Render("No booted simulators. Boot one with `simslim boot <udid>`."))
+		b.WriteString(topFaintStyle.Render(tr("No booted simulators. Boot one with `simslim boot <udid>`.")))
 		b.WriteByte('\n')
 		return b.String() + m.footer()
 	}
 
 	nw := m.nameWidth()
 	for i, s := range m.sims {
-		row := fmt.Sprintf("%-*s %-14s %-6s %5s %6s %8s %8s",
-			nw, truncate(fmt.Sprintf("%s · %s", s.Name, shortUDID(s.UDID)), nw),
+		row := fmt.Sprintf(tr("%-*s %-14s %-6s %5s %6s %8s %8s"),
+			nw, truncate(fmt.Sprintf(tr("%s · %s"), s.Name, shortUDID(s.UDID)), nw),
 			osLabel(s), stateLabel(s), procCount(s), cpuLabel(s), ramLabel(s), diskLabel(m.disk, s.UDID))
 		if i == m.cursor {
 			b.WriteString(topSelStyle.Render(row))
@@ -392,7 +392,7 @@ func (m topModel) sortArrow(col sortCol) string {
 }
 
 func (m topModel) fleetHeader() string {
-	return fmt.Sprintf("%-*s %-14s %-6s %5s %6s %8s %8s",
+	return fmt.Sprintf(tr("%-*s %-14s %-6s %5s %6s %8s %8s"),
 		m.nameWidth(), "SIMULATOR"+m.sortArrow(sortName), "OS"+m.sortArrow(sortOS), "STATE"+m.sortArrow(sortState),
 		"PROC"+m.sortArrow(sortProc), "CPU"+m.sortArrow(sortCPU), "RAM"+m.sortArrow(sortRAM), "DISK"+m.sortArrow(sortDisk))
 }
@@ -420,11 +420,11 @@ func (m topModel) nameWidth() int {
 func (m topModel) tableWidth() int { return m.nameWidth() + fleetFixedCols }
 
 func (m topModel) footer() string {
-	summary := fmt.Sprintf("%d booted · total %s", len(m.sims), fmtBytes(m.total))
-	hint := "↑↓ select · ↵ open · sort n·o·s·p·c·m·d · q quit"
+	summary := fmt.Sprintf(tr("%d booted · total %s"), len(m.sims), fmtBytes(m.total))
+	hint := tr("↑↓ select · ↵ open · sort n·o·s·p·c·m·d · q quit")
 	s := strings.Repeat("─", m.tableWidth()) + "\n" + summary + " · " + hint
 	if m.err != nil {
-		s += "\nrefresh error: " + m.err.Error()
+		s += tr("\nrefresh error: ") + m.err.Error()
 	}
 	return topFaintStyle.Render(s)
 }
@@ -435,23 +435,23 @@ func (m topModel) drillView() string {
 	if title == "" {
 		title = shortUDID(m.selUDID)
 	}
-	b.WriteString(topHeaderStyle.Render(fmt.Sprintf("%s — daemons by %s", title, m.drillSortLabel())))
+	b.WriteString(topHeaderStyle.Render(fmt.Sprintf(tr("%s — daemons by %s"), title, m.drillSortLabel())))
 	b.WriteString("\n\n")
 
 	if m.procErr != nil {
 		b.WriteString(topFaintStyle.Render(m.procErr.Error()))
 		b.WriteString("\n\n")
-		b.WriteString(topFaintStyle.Render("esc back · q quit"))
+		b.WriteString(topFaintStyle.Render(tr("esc back · q quit")))
 		return b.String()
 	}
 	if len(m.procs) == 0 {
-		b.WriteString(topFaintStyle.Render("measuring…"))
+		b.WriteString(topFaintStyle.Render(tr("measuring…")))
 		b.WriteString("\n\n")
-		b.WriteString(topFaintStyle.Render("esc back · q quit"))
+		b.WriteString(topFaintStyle.Render(tr("esc back · q quit")))
 		return b.String()
 	}
 
-	b.WriteString(topHeaderStyle.Render(fmt.Sprintf("%8s %6s  %s",
+	b.WriteString(topHeaderStyle.Render(fmt.Sprintf(tr("%8s %6s  %s"),
 		"RAM"+m.sortArrow(sortRAM), "CPU"+m.sortArrow(sortCPU), "COMMAND"+m.sortArrow(sortName))))
 	b.WriteByte('\n')
 
@@ -459,11 +459,11 @@ func (m topModel) drillView() string {
 	start := clampScroll(m.scroll, len(m.procs), rows)
 	end := min(len(m.procs), start+rows)
 	for _, p := range m.procs[start:end] {
-		b.WriteString(fmt.Sprintf("%8s %5.1f%%  %s\n", fmtBytes(p.Bytes), p.CPU, p.Command))
+		b.WriteString(fmt.Sprintf(tr("%8s %5.1f%%  %s\n"), fmtBytes(p.Bytes), p.CPU, p.Command))
 	}
 
-	pos := fmt.Sprintf("%d–%d of %d", start+1, end, len(m.procs))
-	b.WriteString(topFaintStyle.Render(fmt.Sprintf("%s · ↑↓ scroll · sort m·c·n · esc back · q quit", pos)))
+	pos := fmt.Sprintf(tr("%d–%d of %d"), start+1, end, len(m.procs))
+	b.WriteString(topFaintStyle.Render(fmt.Sprintf(tr("%s · ↑↓ scroll · sort m·c·n · esc back · q quit"), pos)))
 	return b.String()
 }
 
@@ -472,11 +472,11 @@ func (m topModel) drillView() string {
 func (m topModel) drillSortLabel() string {
 	switch m.sortCol {
 	case sortCPU:
-		return "CPU"
+		return trValue("CPU")
 	case sortName:
-		return "command"
+		return trValue("command")
 	default:
-		return "RAM"
+		return trValue("RAM")
 	}
 }
 
@@ -566,14 +566,14 @@ func procCount(s simslim.TopSim) string {
 	if s.Memory == nil {
 		return "—"
 	}
-	return fmt.Sprintf("%d", s.Memory.Processes)
+	return fmt.Sprintf(tr("%d"), s.Memory.Processes)
 }
 
 func cpuLabel(s simslim.TopSim) string {
 	if s.Memory == nil {
 		return "—"
 	}
-	return fmt.Sprintf("%.0f%%", s.Memory.CPU)
+	return fmt.Sprintf(tr("%.0f%%"), s.Memory.CPU)
 }
 
 func ramLabel(s simslim.TopSim) string {
@@ -596,14 +596,14 @@ func diskLabel(disk map[string]int64, udid string) string {
 func fmtBytes(b int64) string {
 	const unit = 1024
 	if b < unit {
-		return fmt.Sprintf("%dB", b)
+		return fmt.Sprintf(tr("%dB"), b)
 	}
 	div, exp := int64(unit), 0
 	for n := b / unit; n >= unit; n /= unit {
 		div *= unit
 		exp++
 	}
-	return fmt.Sprintf("%.1f%c", float64(b)/float64(div), "KMGTPE"[exp])
+	return fmt.Sprintf(tr("%.1f%c"), float64(b)/float64(div), "KMGTPE"[exp])
 }
 
 func shortUDID(u string) string {
@@ -627,13 +627,13 @@ func clampScroll(scroll, total, rows int) int {
 
 func staticFleet(out simslim.TopOutput) string {
 	var b strings.Builder
-	fmt.Fprintf(&b, "%-30s %-14s %-6s %5s %6s %8s\n", "SIMULATOR", "OS", "STATE", "PROC", "CPU", "RAM")
+	fmt.Fprintf(&b, tr("%-30s %-14s %-6s %5s %6s %8s\n"), "SIMULATOR", "OS", "STATE", "PROC", "CPU", "RAM")
 	for _, s := range out.Sims {
-		fmt.Fprintf(&b, "%-30s %-14s %-6s %5s %6s %8s\n",
-			truncate(fmt.Sprintf("%s · %s", s.Name, shortUDID(s.UDID)), 30),
+		fmt.Fprintf(&b, tr("%-30s %-14s %-6s %5s %6s %8s\n"),
+			truncate(fmt.Sprintf(tr("%s · %s"), s.Name, shortUDID(s.UDID)), 30),
 			osLabel(s), stateLabel(s), procCount(s), cpuLabel(s), ramLabel(s))
 	}
-	fmt.Fprintf(&b, "%d booted · total %s\n", len(out.Sims), fmtBytes(out.TotalBytes))
+	fmt.Fprintf(&b, tr("%d booted · total %s\n"), len(out.Sims), fmtBytes(out.TotalBytes))
 	return b.String()
 }
 
@@ -643,9 +643,9 @@ func staticProcs(tp simslim.TopProcesses) string {
 	if name == "" {
 		name = shortUDID(tp.UDID)
 	}
-	fmt.Fprintf(&b, "%s — daemons by RAM\n%8s %6s  %s\n", name, "RAM", "CPU", "COMMAND")
+	fmt.Fprintf(&b, tr("%s — daemons by RAM\n%8s %6s  %s\n"), name, "RAM", "CPU", "COMMAND")
 	for _, p := range tp.Processes {
-		fmt.Fprintf(&b, "%8s %5.1f%%  %s\n", fmtBytes(p.Bytes), p.CPU, p.Command)
+		fmt.Fprintf(&b, tr("%8s %5.1f%%  %s\n"), fmtBytes(p.Bytes), p.CPU, p.Command)
 	}
 	return b.String()
 }

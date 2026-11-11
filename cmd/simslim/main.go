@@ -28,7 +28,7 @@ func main() {
 
 	switch os.Args[1] {
 	case "-v", "--version", "version":
-		fmt.Printf("simslim %s\n", version)
+		fmt.Printf(tr("simslim %s\n"), version)
 		return
 	case "-h", "--help", "help":
 		usage()
@@ -88,17 +88,17 @@ func cmdList(ctx context.Context, cmd *cli.Command) error {
 	summaries := make([]simslim.DeviceSummary, 0, len(devices))
 	for _, d := range devices {
 		managed := len((simslim.Profile{}).DesiredForDevice(d))
-		tag := "shutdown"
+		tag := trValue("shutdown")
 		summary := simslim.DeviceSummary{Device: d, ManagedTotal: managed}
 		if d.State == "Booted" {
-			tag = "booted"
+			tag = trValue("booted")
 			if measurement, ok := memoryByUDID[d.UDID]; ok {
 				measured := measurement
 				summary.Memory = &measured
 			}
 			summary.MemoryError = memoryErrors[d.UDID]
 			if st, _, err := simslim.ReadStatusForDevice(ctx, d); err == nil {
-				tag = fmt.Sprintf("booted · %d/%d slim", st.ManagedDisabled, managed)
+				tag = fmt.Sprintf(tr("booted · %d/%d slim"), st.ManagedDisabled, managed)
 				disabled := st.ManagedDisabled
 				summary.ManagedDisabled = &disabled
 			} else {
@@ -107,7 +107,7 @@ func cmdList(ctx context.Context, cmd *cli.Command) error {
 		}
 		summaries = append(summaries, summary)
 		if !jsonOutput {
-			line := fmt.Sprintf("%s  %-22s %-14s %s", d.UDID, truncate(d.Name, 22), d.RuntimeName(), tag)
+			line := fmt.Sprintf(tr("%s  %-22s %-14s %s"), d.UDID, truncate(d.Name, 22), d.RuntimeName(), tag)
 			if d.Set != "" && d.Set != "default" {
 				line += "  (" + d.Set + ")"
 			}
@@ -134,20 +134,20 @@ func cmdProfiles(_ context.Context, cmd *cli.Command) error {
 		if jsonOutput {
 			return writeJSON(c)
 		}
-		fmt.Printf("%-14s %s\n", c.ID, c.Name)
-		fmt.Printf("               %s\n", c.Description)
-		fmt.Printf("               %d daemons · ~%d MB idle footprint when enabled\n", len(c.Labels), c.ApproxMemoryMB)
-		fmt.Printf("               When disabled: %s\n", c.Downside)
-		fmt.Println("\nDaemons:")
+		fmt.Printf(tr("%-14s %s\n"), c.ID, trValue(c.Name))
+		fmt.Printf(tr("               %s\n"), trValue(c.Description))
+		fmt.Printf(tr("               %d daemons · ~%d MB idle footprint when enabled\n"), len(c.Labels), c.ApproxMemoryMB)
+		fmt.Printf(tr("               When disabled: %s\n"), trValue(c.Downside))
+		fmt.Println(tr("\nDaemons:"))
 		for _, l := range c.Labels {
 			if desc := c.ServiceDescriptions[l]; desc != "" {
-				fmt.Printf("  %-44s %s\n", l, desc)
+				fmt.Printf(tr("  %-44s %s\n"), l, trValue(desc))
 			} else {
-				fmt.Printf("  %s\n", l)
+				fmt.Printf(tr("  %s\n"), l)
 			}
 		}
 		for _, service := range c.AlwaysEnabled {
-			fmt.Printf("  %-44s Always on — %s\n", service.Label, service.Reason)
+			fmt.Printf(tr("  %-44s Always on — %s\n"), service.Label, trValue(service.Reason))
 		}
 		return nil
 	}
@@ -155,16 +155,16 @@ func cmdProfiles(_ context.Context, cmd *cli.Command) error {
 		return writeJSON(simslim.Categories)
 	}
 	for _, c := range simslim.Categories {
-		fmt.Printf("%-14s %s\n", c.ID, c.Name)
-		fmt.Printf("               %d daemons · ~%d MB idle footprint when enabled\n", len(c.Labels), c.ApproxMemoryMB)
-		fmt.Printf("               When disabled: %s\n", c.Downside)
+		fmt.Printf(tr("%-14s %s\n"), c.ID, trValue(c.Name))
+		fmt.Printf(tr("               %d daemons · ~%d MB idle footprint when enabled\n"), len(c.Labels), c.ApproxMemoryMB)
+		fmt.Printf(tr("               When disabled: %s\n"), trValue(c.Downside))
 		for _, service := range c.AlwaysEnabled {
-			fmt.Printf("               Always on: %s — %s\n", service.Label, service.Reason)
+			fmt.Printf(tr("               Always on: %s — %s\n"), service.Label, trValue(service.Reason))
 		}
 	}
-	fmt.Printf("\n%d daemons across %d categories. Core workflow and deadlock-prone daemons are never disabled.\n",
+	fmt.Printf(tr("\n%d daemons across %d categories. Core workflow and deadlock-prone daemons are never disabled.\n"),
 		len(simslim.SlimmableSet()), len(simslim.Categories))
-	fmt.Println("Memory estimates are iOS 26.5 clean-boot measurements; they vary by runtime and workload and are not additive.")
+	fmt.Println(tr("Memory estimates are iOS 26.5 clean-boot measurements; they vary by runtime and workload and are not additive."))
 	return nil
 }
 
@@ -195,7 +195,7 @@ func cmdNewProfile(_ context.Context, cmd *cli.Command) error {
 	sp, err := runProfileWizard(os.Stdin, os.Stderr, enterRawMode)
 	if err != nil {
 		if errors.Is(err, errWizardCancelled) {
-			fmt.Fprintln(os.Stderr, "Cancelled; no profile written.")
+			fmt.Fprintln(os.Stderr, tr("Cancelled; no profile written."))
 			return nil
 		}
 		return err
@@ -204,7 +204,7 @@ func cmdNewProfile(_ context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
-	fmt.Fprintf(os.Stderr, "Keeping %d feature(s) fully enabled and %d individual daemon(s); slimming the rest.\n", len(sp.Except), len(sp.Keep))
+	fmt.Fprintf(os.Stderr, tr("Keeping %d feature(s) fully enabled and %d individual daemon(s); slimming the rest.\n"), len(sp.Except), len(sp.Keep))
 
 	path := dest
 	if intoDir {
@@ -224,7 +224,7 @@ func cmdNewProfile(_ context.Context, cmd *cli.Command) error {
 	if err := os.WriteFile(path, data, 0o644); err != nil {
 		return fmt.Errorf("write %s: %w", path, err)
 	}
-	fmt.Fprintf(os.Stderr, "Wrote %s. Apply it with `simslim on <udid> --profile %s`.\n", path, path)
+	fmt.Fprintf(os.Stderr, tr("Wrote %s. Apply it with `simslim on <udid> --profile %s`.\n"), path, path)
 	return nil
 }
 
@@ -253,18 +253,18 @@ func cmdStatus(ctx context.Context, cmd *cli.Command) error {
 	if jsonOutput {
 		return writeJSON(simslim.StatusOutput{Status: st, Verdict: verdict, Dropped: dropped})
 	}
-	fmt.Printf("%s: %d/%d managed launchd labels disabled (%s)\n", udid, st.ManagedDisabled, st.ManagedTotal, verdict)
+	fmt.Printf(tr("%s: %d/%d managed launchd labels disabled (%s)\n"), udid, st.ManagedDisabled, st.ManagedTotal, trValue(verdict))
 	if st.ManagedDisabled > 0 && !st.Persistent {
-		fmt.Println("  This runtime cannot persist launchd overrides: the state reverts to stock at the next reboot.")
+		fmt.Println(tr("  This runtime cannot persist launchd overrides: the state reverts to stock at the next reboot."))
 	}
 	if showDropped {
 		if len(dropped) == 0 {
-			fmt.Println("  Nothing dropped; every managed launchd label is enabled.")
+			fmt.Println(tr("  Nothing dropped; every managed launchd label is enabled."))
 		}
 		for _, c := range dropped {
-			fmt.Printf("  %-14s %s — %s\n", c.ID, c.Name, c.Downside)
+			fmt.Printf(tr("  %-14s %s — %s\n"), c.ID, trValue(c.Name), trValue(c.Downside))
 			for _, l := range c.Labels {
-				fmt.Printf("    %s\n", l)
+				fmt.Printf(tr("    %s\n"), l)
 			}
 		}
 	}
@@ -290,16 +290,16 @@ func cmdVerify(ctx context.Context, cmd *cli.Command) error {
 			return err
 		}
 	} else if r.OK {
-		fmt.Printf("%s matches the profile: all expected disable overrides are applied.\n", udid)
+		fmt.Printf(tr("%s matches the profile: all expected disable overrides are applied.\n"), udid)
 	} else {
-		fmt.Printf("%s does not match the profile (%d missing, %d extra):\n", udid, len(r.Missing), len(r.Extra))
+		fmt.Printf(tr("%s does not match the profile (%d missing, %d extra):\n"), udid, len(r.Missing), len(r.Extra))
 		for _, l := range r.Missing {
-			fmt.Printf("  missing %s (should be disabled, is enabled)\n", l)
+			fmt.Printf(tr("  missing %s (should be disabled, is enabled)\n"), l)
 		}
 		for _, l := range r.Extra {
-			fmt.Printf("  extra   %s (disabled beyond the profile)\n", l)
+			fmt.Printf(tr("  extra   %s (disabled beyond the profile)\n"), l)
 		}
-		fmt.Println("Re-run `simslim on` with the same profile to repair.")
+		fmt.Println(tr("Re-run `simslim on` with the same profile to repair."))
 	}
 	if !r.OK {
 		os.Exit(1)
@@ -317,7 +317,7 @@ func cmdDoctor(ctx context.Context, cmd *cli.Command) error {
 			return writeJSON(simslim.Features)
 		}
 		for _, f := range simslim.Features {
-			fmt.Printf("%-16s %-38s %s\n", f.ID, f.Name, strings.Join(f.Labels, ", "))
+			fmt.Printf(tr("%-16s %-38s %s\n"), f.ID, trValue(f.Name), strings.Join(f.Labels, ", "))
 		}
 		return nil
 	}
@@ -352,12 +352,12 @@ func cmdDoctor(ctx context.Context, cmd *cli.Command) error {
 				broken++
 			}
 		}
-		fmt.Printf("%s: %d/%d required features OK\n", udid, len(report.Features)-broken, len(report.Features))
+		fmt.Printf(tr("%s: %d/%d required features OK\n"), udid, len(report.Features)-broken, len(report.Features))
 		for _, f := range report.Features {
 			if f.OK {
-				fmt.Printf("  ok    %s\n", f.ID)
+				fmt.Printf(tr("  ok    %s\n"), f.ID)
 			} else {
-				fmt.Printf("  BROKEN %s — %s disabled\n", f.ID, strings.Join(f.Disabled, ", "))
+				fmt.Printf(tr("  BROKEN %s — %s disabled\n"), f.ID, strings.Join(f.Disabled, ", "))
 			}
 		}
 	}
@@ -380,7 +380,7 @@ func cmdMeasure(ctx context.Context, cmd *cli.Command) error {
 	if jsonOutput {
 		return writeJSON(m)
 	}
-	fmt.Printf("%s: %d processes, %s memory footprint (phys_footprint)\n", udid, m.Processes, humanBytes(m.Bytes))
+	fmt.Printf(tr("%s: %d processes, %s memory footprint (phys_footprint)\n"), udid, m.Processes, humanBytes(m.Bytes))
 	return nil
 }
 
@@ -468,7 +468,7 @@ func cmdSize(ctx context.Context, cmd *cli.Command) error {
 	if jsonOutput {
 		return writeJSON(measurement)
 	}
-	fmt.Printf("%s: %s on disk\n", udid, humanBytes(measurement.Bytes))
+	fmt.Printf(tr("%s: %s on disk\n"), udid, humanBytes(measurement.Bytes))
 	return nil
 }
 
@@ -485,8 +485,8 @@ func cmdDiskCategories(_ context.Context, cmd *cli.Command) error {
 		if !category.CanClean {
 			availability = "measured only"
 		}
-		fmt.Printf("%-22s %-28s %s · %s\n", category.ID, category.Name, category.Risk, availability)
-		fmt.Printf("                       %s\n", category.Downside)
+		fmt.Printf(tr("%-22s %-28s %s · %s\n"), category.ID, trValue(category.Name), trValue(category.Risk), trValue(availability))
+		fmt.Printf(tr("                       %s\n"), trValue(category.Downside))
 	}
 	return nil
 }
@@ -506,18 +506,18 @@ func cmdDiskPlan(ctx context.Context, cmd *cli.Command) error {
 	if jsonOutput {
 		return writeJSON(plan)
 	}
-	fmt.Printf("%s: %s currently cleanable\n", udid, humanBytes(plan.CleanableBytes))
+	fmt.Printf(tr("%s: %s currently cleanable\n"), udid, humanBytes(plan.CleanableBytes))
 	for _, category := range plan.Categories {
 		availability := ""
 		if !category.CanClean {
 			availability = " (iOS-managed; measured only)"
 		}
-		fmt.Printf("  %-22s %8s%s\n", category.ID, humanBytes(category.Bytes), availability)
+		fmt.Printf(tr("  %-22s %8s%s\n"), category.ID, humanBytes(category.Bytes), trValue(availability))
 	}
 	if len(plan.Storage) > 0 {
-		fmt.Println("  Stored data (read only)")
+		fmt.Println(tr("  Stored data (read only)"))
 		for _, storage := range plan.Storage {
-			fmt.Printf("    %-20s %8s\n", storage.ID, humanBytes(storage.Bytes))
+			fmt.Printf(tr("    %-20s %8s\n"), storage.ID, humanBytes(storage.Bytes))
 		}
 	}
 	return nil
@@ -545,7 +545,7 @@ func cmdDiskClean(ctx context.Context, cmd *cli.Command) error {
 	if jsonOutput {
 		return writeJSON(result)
 	}
-	fmt.Printf("Cleaned %s and reclaimed %s. Generated contents stay deleted; on-demand assets may download again when needed.\n", udid, humanBytes(result.ReclaimedBytes))
+	fmt.Printf(tr("Cleaned %s and reclaimed %s. Generated contents stay deleted; on-demand assets may download again when needed.\n"), udid, humanBytes(result.ReclaimedBytes))
 	return nil
 }
 
@@ -570,7 +570,7 @@ func cmdClone(ctx context.Context, cmd *cli.Command) error {
 	if jsonOutput {
 		return writeJSON(result)
 	}
-	fmt.Printf("Cloned %s as %q (%s).\n", args[0], name, newUDID)
+	fmt.Printf(tr("Cloned %s as %q (%s).\n"), args[0], name, newUDID)
 	return nil
 }
 
@@ -595,7 +595,7 @@ func cmdRepairClone(ctx context.Context, cmd *cli.Command) error {
 		return writeJSON(result)
 	}
 	fmt.Printf(
-		"Repaired clone %s and verified no links or open files into specified source %s.\n",
+		tr("Repaired clone %s and verified no links or open files into specified source %s.\n"),
 		args[1],
 		args[0],
 	)
@@ -622,7 +622,7 @@ func cmdRename(ctx context.Context, cmd *cli.Command) error {
 	if jsonOutput {
 		return writeJSON(result)
 	}
-	fmt.Printf("Renamed %s to %q.\n", args[0], name)
+	fmt.Printf(tr("Renamed %s to %q.\n"), args[0], name)
 	return nil
 }
 
@@ -642,7 +642,7 @@ func cmdErase(ctx context.Context, cmd *cli.Command) error {
 	if jsonOutput {
 		return writeJSON(result)
 	}
-	fmt.Printf("Erased simulator %s.\n", udid)
+	fmt.Printf(tr("Erased simulator %s.\n"), udid)
 	return nil
 }
 
@@ -662,7 +662,7 @@ func cmdDelete(ctx context.Context, cmd *cli.Command) error {
 	if jsonOutput {
 		return writeJSON(result)
 	}
-	fmt.Printf("Deleted simulator %s.\n", udid)
+	fmt.Printf(tr("Deleted simulator %s.\n"), udid)
 	return nil
 }
 
@@ -684,7 +684,7 @@ func cmdBoot(ctx context.Context, cmd *cli.Command) error {
 		if jsonOutput {
 			return writeJSON(result)
 		}
-		fmt.Printf("Simulator %s is already booted.\n", udid)
+		fmt.Printf(tr("Simulator %s is already booted.\n"), udid)
 		return nil
 	}
 
@@ -692,7 +692,7 @@ func cmdBoot(ctx context.Context, cmd *cli.Command) error {
 	// caller informed. Suppressed under --json so machine consumers that read a
 	// combined stdout/stderr stream get clean JSON.
 	if !jsonOutput {
-		fmt.Fprintf(os.Stderr, "Booting %s...\n", udid)
+		fmt.Fprintf(os.Stderr, tr("Booting %s...\n"), udid)
 	}
 	tctx, cancel := context.WithTimeout(ctx, simslim.BootTimeout)
 	defer cancel()
@@ -702,7 +702,7 @@ func cmdBoot(ctx context.Context, cmd *cli.Command) error {
 	if jsonOutput {
 		return writeJSON(result)
 	}
-	fmt.Printf("Booted %s.\n", udid)
+	fmt.Printf(tr("Booted %s.\n"), udid)
 	return nil
 }
 
@@ -724,7 +724,7 @@ func cmdShutdown(ctx context.Context, cmd *cli.Command) error {
 		if jsonOutput {
 			return writeJSON(result)
 		}
-		fmt.Printf("Simulator %s is already shut down.\n", udid)
+		fmt.Printf(tr("Simulator %s is already shut down.\n"), udid)
 		return nil
 	}
 
@@ -739,7 +739,7 @@ func cmdShutdown(ctx context.Context, cmd *cli.Command) error {
 	if jsonOutput {
 		return writeJSON(result)
 	}
-	fmt.Printf("Shut down %s.\n", udid)
+	fmt.Printf(tr("Shut down %s.\n"), udid)
 	return nil
 }
 
@@ -775,9 +775,9 @@ func cmdOn(ctx context.Context, cmd *cli.Command) error {
 	originallyShutdown := preserveBootState && startedShutdown
 
 	if startedShutdown {
-		fmt.Fprintf(os.Stderr, "Slimming %s: disabling %d background services while it is off, then booting it slim.\n", udid, len(p.DesiredForDevice(device)))
+		fmt.Fprintf(os.Stderr, tr("Slimming %s: disabling %d background services while it is off, then booting it slim.\n"), udid, len(p.DesiredForDevice(device)))
 	} else {
-		fmt.Fprintf(os.Stderr, "Slimming %s: disabling %d background services. The simulator will reboot to apply the changes.\n", udid, len(p.DesiredForDevice(device)))
+		fmt.Fprintf(os.Stderr, tr("Slimming %s: disabling %d background services. The simulator will reboot to apply the changes.\n"), udid, len(p.DesiredForDevice(device)))
 	}
 	changed, operationErr := simslim.EnableSlim(tctx, device.Set, udid, p, report)
 	if originallyShutdown {
@@ -795,17 +795,17 @@ func cmdOn(ctx context.Context, cmd *cli.Command) error {
 	if changed {
 		switch {
 		case originallyShutdown:
-			fmt.Println("Done. Simulator reconfigured slim and returned to shutdown.")
+			fmt.Println(tr("Done. Simulator reconfigured slim and returned to shutdown."))
 		case startedShutdown:
-			fmt.Println("Done. Simulator reconfigured slim and booted.")
+			fmt.Println(tr("Done. Simulator reconfigured slim and booted."))
 		default:
-			fmt.Println("Done. Simulator reconfigured and rebooted slim.")
+			fmt.Println(tr("Done. Simulator reconfigured and rebooted slim."))
 		}
 	} else {
 		if originallyShutdown {
-			fmt.Println("Already slim. Original shutdown state restored.")
+			fmt.Println(tr("Already slim. Original shutdown state restored."))
 		} else {
-			fmt.Println("Already slim. Nothing to change.")
+			fmt.Println(tr("Already slim. Nothing to change."))
 		}
 	}
 	return nil
@@ -815,20 +815,20 @@ func cmdOn(ctx context.Context, cmd *cli.Command) error {
 // The closing line says what the next boot brings, since on iOS < 18.5 the
 // state is gone after a reboot and someone will otherwise report that as a bug.
 func onNoReboot(ctx context.Context, device simslim.Device, p simslim.Profile, report simslim.Reporter) error {
-	fmt.Fprintf(os.Stderr, "Slimming %s for this boot session: stopping %d background services without a reboot.\n", device.UDID, len(p.DesiredForDevice(device)))
+	fmt.Fprintf(os.Stderr, tr("Slimming %s for this boot session: stopping %d background services without a reboot.\n"), device.UDID, len(p.DesiredForDevice(device)))
 	changed, err := simslim.EnableSlimNoReboot(ctx, device.Set, device.UDID, p, report)
 	if err != nil {
 		return err
 	}
 	if changed {
-		fmt.Println("Done. Simulator slimmed for this boot session without a reboot.")
+		fmt.Println(tr("Done. Simulator slimmed for this boot session without a reboot."))
 	} else {
-		fmt.Println("Already slim. Confirmed every profiled daemon is stopped for this boot session.")
+		fmt.Println(tr("Already slim. Confirmed every profiled daemon is stopped for this boot session."))
 	}
 	if device.SupportsPersistentOverrides() {
-		fmt.Println("The disable overrides are also stored, so the next boot should come up slim; `simslim verify` after a reboot confirms it.")
+		fmt.Println(tr("The disable overrides are also stored, so the next boot should come up slim; `simslim verify` after a reboot confirms it."))
 	} else {
-		fmt.Printf("%s cannot persist overrides: the simulator returns to stock at its next boot, so re-run this command after every boot.\n", device.RuntimeName())
+		fmt.Printf(tr("%s cannot persist overrides: the simulator returns to stock at its next boot, so re-run this command after every boot.\n"), device.RuntimeName())
 	}
 	return nil
 }
@@ -845,7 +845,7 @@ func cmdWatch(ctx context.Context, cmd *cli.Command) error {
 	}
 	report := simslim.Reporter(func(msg string) { fmt.Fprintln(os.Stderr, msg) })
 	sets := append([]string{"default", "testing"}, simslim.ExtraDeviceSetTokens()...)
-	fmt.Fprintf(os.Stderr, "Watching device sets [%s]; slimming each simulator before it boots where its runtime allows, and no-reboot as it boots. Ctrl-C to stop.\n", strings.Join(sets, ", "))
+	fmt.Fprintf(os.Stderr, tr("Watching device sets [%s]; slimming each simulator before it boots where its runtime allows, and no-reboot as it boots. Ctrl-C to stop.\n"), strings.Join(sets, ", "))
 	return simslim.Watch(ctx, p, cmd.Duration("interval"), report)
 }
 
@@ -862,9 +862,9 @@ func cmdOff(ctx context.Context, cmd *cli.Command) error {
 	startedShutdown := device.State == "Shutdown"
 	originallyShutdown := preserveBootState && startedShutdown
 	if startedShutdown {
-		fmt.Fprintf(os.Stderr, "Restoring %s to stock while it is off, then booting it.\n", udid)
+		fmt.Fprintf(os.Stderr, tr("Restoring %s to stock while it is off, then booting it.\n"), udid)
 	} else {
-		fmt.Fprintf(os.Stderr, "Restoring %s to stock. The simulator will reboot to apply the changes.\n", udid)
+		fmt.Fprintf(os.Stderr, tr("Restoring %s to stock. The simulator will reboot to apply the changes.\n"), udid)
 	}
 	report := simslim.Reporter(func(msg string) { fmt.Fprintln(os.Stderr, msg) })
 	tctx, cancel := context.WithTimeout(ctx, simslim.BootTimeout)
@@ -885,17 +885,17 @@ func cmdOff(ctx context.Context, cmd *cli.Command) error {
 	if changed {
 		switch {
 		case originallyShutdown:
-			fmt.Println("Done. All daemons re-enabled and simulator returned to shutdown.")
+			fmt.Println(tr("Done. All daemons re-enabled and simulator returned to shutdown."))
 		case startedShutdown:
-			fmt.Println("Done. All daemons re-enabled and simulator booted.")
+			fmt.Println(tr("Done. All daemons re-enabled and simulator booted."))
 		default:
-			fmt.Println("Done. All daemons re-enabled and simulator rebooted.")
+			fmt.Println(tr("Done. All daemons re-enabled and simulator rebooted."))
 		}
 	} else {
 		if originallyShutdown {
-			fmt.Println("Already stock. Original shutdown state restored.")
+			fmt.Println(tr("Already stock. Original shutdown state restored."))
 		} else {
-			fmt.Println("Already stock. Nothing to change.")
+			fmt.Println(tr("Already stock. Nothing to change."))
 		}
 	}
 	return nil
@@ -919,10 +919,10 @@ func cmdEnable(ctx context.Context, cmd *cli.Command) error {
 		return writeJSON(out)
 	}
 	if out.Live {
-		fmt.Printf("Enabled %d services on %s without a reboot.\n", len(out.Labels), udid)
+		fmt.Printf(tr("Enabled %d services on %s without a reboot.\n"), len(out.Labels), udid)
 	}
 	if len(out.NotStarted) > 0 {
-		fmt.Printf("  launchd starts %d of them at the next boot, not in this one: %s\n", len(out.NotStarted), strings.Join(out.NotStarted, ", "))
+		fmt.Printf(tr("  launchd starts %d of them at the next boot, not in this one: %s\n"), len(out.NotStarted), strings.Join(out.NotStarted, ", "))
 	}
 	printSaved(out)
 	return nil
@@ -949,12 +949,12 @@ func cmdDisable(ctx context.Context, cmd *cli.Command) error {
 	switch {
 	case !out.Live:
 	case len(out.Labels) == 0:
-		fmt.Printf("Nothing to stop on %s.\n", udid)
+		fmt.Printf(tr("Nothing to stop on %s.\n"), udid)
 	default:
-		fmt.Printf("Stopped %d services on %s without a reboot.\n", len(out.Labels), udid)
+		fmt.Printf(tr("Stopped %d services on %s without a reboot.\n"), len(out.Labels), udid)
 	}
 	if len(out.StillEnabled) > 0 {
-		fmt.Printf("  %d stay enabled for another fully enabled category or the platform: %s\n", len(out.StillEnabled), strings.Join(out.StillEnabled, ", "))
+		fmt.Printf(tr("  %d stay enabled for another fully enabled category or the platform: %s\n"), len(out.StillEnabled), strings.Join(out.StillEnabled, ", "))
 	}
 	printSaved(out)
 	return nil
@@ -965,11 +965,11 @@ func cmdDisable(ctx context.Context, cmd *cli.Command) error {
 func printSaved(out simslim.ServicesOutput) {
 	switch {
 	case out.Saved == "":
-		fmt.Println("This lasts until the next `on` or `watch` pass; pass --save <profile.json> to keep it in a profile.")
+		fmt.Println(tr("This lasts until the next `on` or `watch` pass; pass --save <profile.json> to keep it in a profile."))
 	case out.Live:
-		fmt.Printf("Saved to %s. Apply it later with `simslim on %s --profile %s`.\n", out.Saved, out.UDID, out.Saved)
+		fmt.Printf(tr("Saved to %s. Apply it later with `simslim on %s --profile %s`.\n"), out.Saved, out.UDID, out.Saved)
 	default:
-		fmt.Printf("Saved to %s; nothing was applied, the simulator is not booted. Apply it with `simslim on %s --profile %s`.\n", out.Saved, out.UDID, out.Saved)
+		fmt.Printf(tr("Saved to %s; nothing was applied, the simulator is not booted. Apply it with `simslim on %s --profile %s`.\n"), out.Saved, out.UDID, out.Saved)
 	}
 }
 
@@ -1029,13 +1029,13 @@ func truncate(s string, n int) string {
 func humanBytes(b int64) string {
 	switch {
 	case b >= 1<<30:
-		return fmt.Sprintf("%.2f GB", float64(b)/(1<<30))
+		return fmt.Sprintf(tr("%.2f GB"), float64(b)/(1<<30))
 	case b >= 1<<20:
-		return fmt.Sprintf("%.0f MB", float64(b)/(1<<20))
+		return fmt.Sprintf(tr("%.0f MB"), float64(b)/(1<<20))
 	case b >= 1<<10:
-		return fmt.Sprintf("%.0f KB", float64(b)/(1<<10))
+		return fmt.Sprintf(tr("%.0f KB"), float64(b)/(1<<10))
 	default:
-		return fmt.Sprintf("%d B", b)
+		return fmt.Sprintf(tr("%d B"), b)
 	}
 }
 
@@ -1045,7 +1045,16 @@ func fatal(msg string) {
 }
 
 func usage() {
-	fmt.Print(`simslim runs more iOS, tvOS, watchOS, and visionOS simulators on the same Mac by disabling the
+	if simslim.CurrentLanguage() == "zh-Hans" {
+		fmt.Print(usageChinese)
+		return
+	}
+	fmt.Print(usageEnglish)
+}
+
+// usageEnglish is kept verbatim so English output stays byte-for-byte
+// identical; usageChinese lives in i18n.go.
+const usageEnglish = `simslim runs more iOS, tvOS, watchOS, and visionOS simulators on the same Mac by disabling the
 background daemons a simulator does not need.
 
 USAGE
@@ -1170,8 +1179,7 @@ when a feature needs it. Required Siri assets are informational only because iOS
 restores them after deletion. simslim never modifies the shared iOS runtime.
 
   https://github.com/mobai-app/simslim · by MobAI (https://mobai.run)
-`)
-}
+`
 
 // writeJSON renders the machine-readable output the GUI and other integrations
 // decode. It goes to stdout; progress chatter goes to stderr.

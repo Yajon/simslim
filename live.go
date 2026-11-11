@@ -34,7 +34,7 @@ func EnableServices(ctx context.Context, udid string, ids []string, save string,
 	out := ServicesOutput{Action: "enable", UDID: d.UDID, Live: d.State == "Booted", Labels: []string{}}
 	if out.Live {
 		out.Labels = sortedKeys(coveredLabels(categories, labels))
-		report.report(fmt.Sprintf("Starting %d background services without a reboot...", len(out.Labels)))
+		report.report(TR("Starting %d background services without a reboot...", len(out.Labels)))
 		if out.NotStarted, err = startServices(ctx, d, out.Labels, report); err != nil {
 			return out, unsaved(err, save)
 		}
@@ -101,7 +101,7 @@ func stopNamed(ctx context.Context, d Device, out *ServicesOutput, categories, l
 	if len(out.Labels) == 0 {
 		return nil
 	}
-	report.report(fmt.Sprintf("Stopping %d background services without a reboot...", len(out.Labels)))
+	report.report(TR("Stopping %d background services without a reboot...", len(out.Labels)))
 	return stopServices(ctx, d, out.Labels, report)
 }
 
@@ -270,7 +270,7 @@ func startServices(ctx context.Context, d Device, labels []string, report Report
 		}
 	}
 	if len(pending) == 0 {
-		report.report(fmt.Sprintf("  all %d services were already running", len(labels)))
+		report.report(TR("  all %d services were already running", len(labels)))
 		return nil, nil
 	}
 	var paths []string
@@ -284,7 +284,7 @@ func startServices(ctx context.Context, d Device, labels []string, report Report
 		if disabled, loaded, err = serviceState(ctx, set, udid); err != nil {
 			return nil, err
 		}
-		report.report(fmt.Sprintf("  %d/%d services started in one batch", len(pending)-len(stillToStart(pending, disabled, loaded, loadable)), len(pending)))
+		report.report(TR("  %d/%d services started in one batch", len(pending)-len(stillToStart(pending, disabled, loaded, loadable)), len(pending)))
 	}
 	var toEnable []string
 	unloaded := map[string]string{}

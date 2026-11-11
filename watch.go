@@ -221,7 +221,7 @@ type watcher struct {
 func (w *watcher) scan(ctx context.Context) {
 	devices, err := ListDevices(ctx)
 	if err != nil {
-		w.report.report(fmt.Sprintf("watch: list devices: %v", err))
+		w.report.report(TR("watch: list devices: %v", err))
 		return
 	}
 	sort.Slice(devices, func(i, j int) bool { return devices[i].UDID < devices[j].UDID })
@@ -246,16 +246,16 @@ func (w *watcher) scan(ctx context.Context) {
 		w.wg.Add(1)
 		go func(d Device) {
 			defer w.wg.Done()
-			w.report.report(fmt.Sprintf("watch: slimming %s (set %s)", d.UDID, d.Set))
+			w.report.report(TR("watch: slimming %s (set %s)", d.UDID, d.Set))
 			if _, err := w.slim(ctx, d.Set, d.UDID, w.p, prefixed(w.report, d.UDID)); err != nil {
-				w.report.report(fmt.Sprintf("watch: %s: %v", d.UDID, err))
+				w.report.report(TR("watch: %s: %v", d.UDID, err))
 				// A transient launchctl failure would otherwise leave this clone
 				// stock for the whole test run. The next scan retries it, and a
 				// torn-down clone drops out of simctl list, so this does not loop.
 				w.forget(d.UDID)
 				return
 			}
-			w.report.report(fmt.Sprintf("watch: slimmed %s", d.UDID))
+			w.report.report(TR("watch: slimmed %s", d.UDID))
 		}(d)
 	}
 }
@@ -274,7 +274,7 @@ func (w *watcher) seed(d Device) {
 	}
 	n, err := w.preslim(d, w.p)
 	if err != nil {
-		w.report.report(fmt.Sprintf("watch: %s: slim before boot: %v", d.UDID, err))
+		w.report.report(TR("watch: %s: slim before boot: %v", d.UDID, err))
 		return
 	}
 	w.seeded[d.UDID] = true
@@ -284,10 +284,10 @@ func (w *watcher) seed(d Device) {
 	// launchd_sim reads the store once, when it starts: a seed that lands after
 	// the boot began only counts from the next boot.
 	if now, err := readDevicePlist(deviceDir{path: filepath.Dir(d.DataPath), set: d.Set}); d.DataPath != "" && err == nil && now.State != "Shutdown" {
-		w.report.report(fmt.Sprintf("watch: %s booted before its slim (%d services) landed; slimming it as it boots", d.UDID, n))
+		w.report.report(TR("watch: %s booted before its slim (%d services) landed; slimming it as it boots", d.UDID, n))
 		return
 	}
-	w.report.report(fmt.Sprintf("watch: slimmed %s before boot (%d services disabled, set %s)", d.UDID, n, d.Set))
+	w.report.report(TR("watch: slimmed %s before boot (%d services disabled, set %s)", d.UDID, n, d.Set))
 }
 
 // claim reserves a UDID for this scan, reporting false when it is already
@@ -333,5 +333,5 @@ func (w *watcher) forget(udid string) {
 // prefixed tags a device's own progress lines with its UDID, so the interleaved
 // output of concurrent slims stays attributable.
 func prefixed(report Reporter, udid string) Reporter {
-	return func(msg string) { report.report(fmt.Sprintf("watch: %s: %s", udid, msg)) }
+	return func(msg string) { report.report(TR("watch: %s: %s", udid, msg)) }
 }

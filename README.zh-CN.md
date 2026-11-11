@@ -59,6 +59,8 @@ macOS 应用最低支持 macOS 13，可用 Xcode 15.1（Swift 5.9）或更新版
 
 应用最低支持 macOS 13（Info.plist 与构建脚本的部署目标一致），并已在 Xcode 15.1 / Swift 5.9 下验证编译。
 
+内置 CLI 的人类可读输出也会跟随语言，优先级为：`SIMSLIM_LANG`（由应用设为当前界面语言）> 应用保存的 `appLanguage` > `LC_ALL`/`LANG` > 系统 `AppleLanguages` > 英文兜底。脚本里可用 `SIMSLIM_LANG=en` 固定英文。`--json` 输出与 Go 错误对象从不翻译。
+
 用 Go 和 Xcode 本地构建：
 
 ```sh

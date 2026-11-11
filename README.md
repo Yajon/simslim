@@ -82,6 +82,12 @@ Xcode 15.1 / Swift 5.9 as well as the Xcode 26.6 used in CI, so newer SwiftUI
 types are guarded by availability fallbacks. The toolbar Language menu switches
 the UI between English and 简体中文; the choice is applied after a relaunch.
 
+The bundled CLI localizes its human-readable output the same way, resolving the
+language in this order: `SIMSLIM_LANG` (set by the app to its active UI
+language), the app's saved `appLanguage`, `LC_ALL`/`LANG`, the macOS
+`AppleLanguages` preference, then English. Use `SIMSLIM_LANG=en` in scripts to
+force English. `--json` output and Go error values are never translated.
+
 Build it locally with Go and Xcode:
 
 ```sh

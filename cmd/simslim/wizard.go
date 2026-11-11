@@ -42,9 +42,9 @@ func enterRawMode() (func(), int, error) {
 	if err := stty("raw", "-echo").Run(); err != nil {
 		return nil, 0, fmt.Errorf("enter raw mode: %w", err)
 	}
-	fmt.Fprint(os.Stderr, "\x1b[?1049h\x1b[?25l") // alternate screen + hide cursor
+	fmt.Fprint(os.Stderr, tr("\x1b[?1049h\x1b[?25l")) // alternate screen + hide cursor
 	return func() {
-		fmt.Fprint(os.Stderr, "\x1b[?25h\x1b[?1049l") // restore cursor + primary screen
+		fmt.Fprint(os.Stderr, tr("\x1b[?25h\x1b[?1049l")) // restore cursor + primary screen
 		_ = stty(strings.TrimSpace(string(saved))).Run()
 	}, rows, nil
 }
@@ -77,10 +77,10 @@ func runProfileWizard(in io.Reader, out io.Writer, enterRaw func() (func(), int,
 		return strings.TrimSpace(line)
 	}
 
-	fmt.Fprintln(out, "Create a slim profile.")
+	fmt.Fprintln(out, tr("Create a slim profile."))
 	fmt.Fprintln(out)
-	name := readLine("Name (optional): ")
-	description := readLine("Description (optional): ")
+	name := readLine(tr("Name (optional): "))
+	description := readLine(tr("Description (optional): "))
 
 	restore, rows, err := enterRaw()
 	if err != nil {
@@ -163,10 +163,10 @@ func selectProfile(r *bufio.Reader, out io.Writer, termRows int) (except, keep m
 	except = map[string]bool{}
 	keep = map[string]bool{}
 	header := []string{
-		"simslim.Features to keep enabled — everything unchecked is slimmed.",
-		"[x] whole feature kept · [~] some daemons kept",
+		tr("simslim.Features to keep enabled — everything unchecked is slimmed."),
+		tr("[x] whole feature kept · [~] some daemons kept"),
 	}
-	footer := "↑/↓ move · space keep feature · → pick daemons · a all · n none · enter save · q cancel"
+	footer := tr("↑/↓ move · space keep feature · → pick daemons · a all · n none · enter save · q cancel")
 	visible := viewportRows(termRows, len(header))
 	cursor, top := 0, 0
 	for {
@@ -205,10 +205,10 @@ func selectProfile(r *bufio.Reader, out io.Writer, termRows int) (except, keep m
 // returns to the feature list; Ctrl-C aborts the whole wizard (via cancelled).
 func selectDaemons(r *bufio.Reader, out io.Writer, c simslim.Category, keep map[string]bool, termRows int) (cancelled bool) {
 	header := []string{
-		c.Name + " — keep individual daemons enabled.",
-		"Unchecked daemons in this feature are slimmed.",
+		trValue(c.Name) + tr(" — keep individual daemons enabled."),
+		tr("Unchecked daemons in this feature are slimmed."),
 	}
-	footer := "↑/↓ move · space keep daemon · a all · n none · ← back · q cancel"
+	footer := tr("↑/↓ move · space keep daemon · a all · n none · ← back · q cancel")
 	visible := viewportRows(termRows, len(header))
 	cursor, top := 0, 0
 	for {
@@ -252,10 +252,10 @@ func categoryRows(except, keep map[string]bool) []string {
 		default:
 			if n := categoryKeepCount(c, keep); n > 0 {
 				box = "[~]"
-				suffix = fmt.Sprintf("  (%d kept)", n)
+				suffix = fmt.Sprintf(tr("  (%d kept)"), n)
 			}
 		}
-		rows[i] = fmt.Sprintf("%s %-14s %s%s", box, c.ID, c.Name, suffix)
+		rows[i] = fmt.Sprintf(tr("%s %-14s %s%s"), box, c.ID, trValue(c.Name), suffix)
 	}
 	return rows
 }
@@ -268,9 +268,9 @@ func daemonRows(c simslim.Category, keep map[string]bool) []string {
 		if keep[l] {
 			box = "[x]"
 		}
-		line := fmt.Sprintf("%s %s", box, l)
+		line := fmt.Sprintf(tr("%s %s"), box, l)
 		if desc := c.ServiceDescriptions[l]; desc != "" {
-			line = fmt.Sprintf("%s %-44s %s", box, l, desc)
+			line = fmt.Sprintf(tr("%s %-44s %s"), box, l, trValue(desc))
 		}
 		rows[i] = truncate(line, 76)
 	}
@@ -290,9 +290,9 @@ func categoryKeepCount(c simslim.Category, keep map[string]bool) int {
 // drawChecklist repaints the screen: header, a windowed slice of rows with a ❯
 // cursor, and a footer. It clears first, so each call fully replaces the frame.
 func drawChecklist(out io.Writer, header, rows []string, footer string, cursor, top, visible int) {
-	fmt.Fprint(out, "\x1b[H\x1b[J") // home + clear to end of screen
+	fmt.Fprint(out, tr("\x1b[H\x1b[J")) // home + clear to end of screen
 	for _, h := range header {
-		fmt.Fprintf(out, "%s\r\n", h)
+		fmt.Fprintf(out, tr("%s\r\n"), h)
 	}
 	end := top + visible
 	if end > len(rows) {
@@ -303,16 +303,16 @@ func drawChecklist(out io.Writer, header, rows []string, footer string, cursor, 
 		if i == cursor {
 			pointer = "❯ "
 		}
-		fmt.Fprintf(out, "%s%s\r\n", pointer, rows[i])
+		fmt.Fprintf(out, tr("%s%s\r\n"), pointer, rows[i])
 	}
 	more := ""
 	if top > 0 {
-		more += " ↑more"
+		more += tr(" ↑more")
 	}
 	if end < len(rows) {
-		more += " ↓more"
+		more += tr(" ↓more")
 	}
-	fmt.Fprintf(out, "\r\n%s%s", footer, more)
+	fmt.Fprintf(out, tr("\r\n%s%s"), footer, more)
 }
 
 // viewportRows is how many list rows fit given the terminal height and header.

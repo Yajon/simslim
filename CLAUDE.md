@@ -192,12 +192,22 @@ with Xcode 15.1 (Swift 5.9); CI uses Xcode 26.6. Swift 5.9 rejects mutating an
 actor-isolated dictionary subscript inside an async closure, so batch results
 are staged and written through synchronous helpers.
 
-**Localization** is table-driven: every user-visible string goes through `tr()`
-(`gui/Localization.swift`), with English as the key and translations in
-`gui/zh-Hans.lproj/Localizable.strings`. The Language menu persists the choice
-and relaunches, because relabeling `NSToolbarItem` in place crashes on macOS.
-Go-side category, service-description, and always-on reason strings are also
-displayed through `tr()`, so new CLI copy needs a matching table entry.
+**Localization** is table-driven. The SwiftUI app sends every user-visible
+string through `tr()` (`gui/Localization.swift`), with English as the key and
+translations in `gui/zh-Hans.lproj/Localizable.strings`. The Language menu
+persists the choice and relaunches, because relabeling `NSToolbarItem` in place
+crashes on macOS.
+
+The CLI has its own table: `TR()`/`TRValue()` in the root `i18n.go` plus the
+`tr()`/`trValue()` wrappers in `cmd/simslim/i18n.go`, backed by `i18n_zh.go`.
+Language resolution is `SIMSLIM_LANG` (set by `gui/Backend.swift` to the
+language the running UI was built with) > the GUI's saved `appLanguage` >
+`LC_ALL`/`LANG` > the macOS global `AppleLanguages` > English. Keys are the
+exact English source strings, so new human-readable CLI copy needs a matching
+`i18n_zh.go` entry or it silently falls back to English. `--json` output, Go
+error values, fixed-width table headers, and Apple feature names are never
+translated; `cmd/simslim/i18n_test.go` and `i18n_test.go` pin tests to English
+so a Chinese host locale cannot change assertions.
 
 ## Safety invariants — preserve these
 

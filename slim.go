@@ -59,7 +59,7 @@ func ensure(ctx context.Context, set, udid string, desired map[string]bool, repo
 		if toDisable, toEnable := delta(live, desired, managedSet()); len(toDisable) == 0 && len(toEnable) == 0 {
 			return false, nil
 		}
-		report.report("Shutting the simulator down to reconfigure it offline...")
+		report.report(TR("Shutting the simulator down to reconfigure it offline..."))
 		if err := Shutdown(ctx, set, udid); err != nil {
 			return false, fmt.Errorf("shutdown before reconfigure: %w", err)
 		}
@@ -74,9 +74,9 @@ func ensure(ctx context.Context, set, udid string, desired map[string]bool, repo
 			// A device that started booted only gets here with a real delta.
 			return changed || booted, err
 		}
-		report.report("Could not apply the changes while the simulator was off; reconfiguring it while booted instead...")
+		report.report(TR("Could not apply the changes while the simulator was off; reconfiguring it while booted instead..."))
 	}
-	report.report("Booting the simulator (a first boot can take up to a minute)...")
+	report.report(TR("Booting the simulator (a first boot can take up to a minute)..."))
 	if err := BootAndWait(ctx, set, udid); err != nil {
 		return false, err
 	}
@@ -89,15 +89,15 @@ func ensure(ctx context.Context, set, udid string, desired map[string]bool, repo
 		return false, nil
 	}
 	if len(toDisable) > 0 {
-		report.report(fmt.Sprintf("Disabling %d background services...", len(toDisable)))
+		report.report(TR("Disabling %d background services...", len(toDisable)))
 	}
 	if len(toEnable) > 0 {
-		report.report(fmt.Sprintf("Re-enabling %d background services...", len(toEnable)))
+		report.report(TR("Re-enabling %d background services...", len(toEnable)))
 	}
 	if err := applyDelta(ctx, set, udid, toDisable, toEnable, "disable", report); err != nil {
 		return true, err
 	}
-	report.report("Rebooting the simulator to apply the changes...")
+	report.report(TR("Rebooting the simulator to apply the changes..."))
 	if err := Shutdown(ctx, set, udid); err != nil {
 		return true, fmt.Errorf("shutdown before reboot: %w", err)
 	}
@@ -131,12 +131,12 @@ func ensureOffline(ctx context.Context, set, udid string, desired map[string]boo
 	toDisable, toEnable := delta(current, desired, managedSet())
 	changed = len(toDisable) > 0 || len(toEnable) > 0
 	if changed {
-		report.report(fmt.Sprintf("Reconfiguring %d background services while the simulator is off...", len(toDisable)+len(toEnable)))
+		report.report(TR("Reconfiguring %d background services while the simulator is off...", len(toDisable)+len(toEnable)))
 		if err := writeDisabledStore(udid, toDisable, toEnable); err != nil {
 			return false, fmt.Errorf("%w: %v", errOfflineIneffective, err)
 		}
 	}
-	report.report("Booting the simulator (a first boot can take up to a minute)...")
+	report.report(TR("Booting the simulator (a first boot can take up to a minute)..."))
 	if err := BootAndWait(ctx, set, udid); err != nil {
 		return changed, err
 	}
@@ -224,7 +224,7 @@ func EnableSlimNoReboot(ctx context.Context, set, udid string, p Profile, report
 		return false, err
 	}
 	desired := p.DesiredForDevice(d)
-	report.report("Booting the simulator (a first boot can take up to a minute)...")
+	report.report(TR("Booting the simulator (a first boot can take up to a minute)..."))
 	if err := BootAndWait(ctx, set, udid); err != nil {
 		return false, err
 	}
@@ -235,7 +235,7 @@ func EnableSlimNoReboot(ctx context.Context, set, udid string, p Profile, report
 	managed := managedSet()
 	toDisable, extra := delta(current, desired, managed)
 	if len(extra) > 0 {
-		report.report(fmt.Sprintf("Leaving %d services disabled beyond this profile; only `simslim off` re-enables them.", len(extra)))
+		report.report(TR("Leaving %d services disabled beyond this profile; only `simslim off` re-enables them.", len(extra)))
 	}
 	// Check every profiled label, not just those without an override: an
 	// override says nothing about whether the job is still loaded (an earlier
@@ -249,7 +249,7 @@ func EnableSlimNoReboot(ctx context.Context, set, udid string, p Profile, report
 		}
 	}
 	sort.Strings(labels)
-	report.report(fmt.Sprintf("Stopping %d background services for this boot session...", len(labels)))
+	report.report(TR("Stopping %d background services for this boot session...", len(labels)))
 	remaining := unloadInBatch(ctx, set, udid, d.RuntimeID, labels, readPlistLabel, report)
 	if err := applyDelta(ctx, set, udid, remaining, nil, liveDisable, report); err != nil {
 		return changed, err
@@ -284,7 +284,7 @@ func unloadInBatch(ctx context.Context, set, udid, runtimeID string, labels []st
 		return labels
 	}
 	if len(pending) == 0 {
-		report.report(fmt.Sprintf("  all %d services were already stopped", len(labels)))
+		report.report(TR("  all %d services were already stopped", len(labels)))
 		return nil
 	}
 	plists := launchdJobPlists(ctx, root, pending, plistLabel)
@@ -302,7 +302,7 @@ func unloadInBatch(ctx context.Context, set, udid, runtimeID string, labels []st
 	if err != nil {
 		return pending
 	}
-	report.report(fmt.Sprintf("  %d/%d services stopped in one batch", len(pending)-len(rest), len(pending)))
+	report.report(TR("  %d/%d services stopped in one batch", len(pending)-len(rest), len(pending)))
 	return rest
 }
 
