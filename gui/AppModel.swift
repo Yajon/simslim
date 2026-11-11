@@ -355,8 +355,8 @@ final class AppModel: ObservableObject {
       action: "Cleaning", devices: devices, reservation: "Waiting to start…"
     ) { [weak self] device in
       guard let self else { return false }
-      self.setOperation("Cleaning disk data…", for: device.udid)
-      self.record(.info, "Cleaning disk data from \(device.name)")
+      self.setOperation(tr("Cleaning disk data…"), for: device.udid)
+      self.record(.info, tr("Cleaning disk data from %@", device.name))
       do {
         let result = try await backend.cleanDisk(
           udid: device.udid,
@@ -549,7 +549,11 @@ final class AppModel: ObservableObject {
     ) { [weak self] device in
       guard let self else { return false }
       do {
-        self.diskCleanupPlans[device.udid] = try await backend.diskCleanupPlan(udid: device.udid)
+        // Swift 5.9 (Xcode 15.1) rejects an actor-isolated dictionary subscript
+        // mutation inside an async closure; stage the decoded plan and store it
+        // from a synchronous helper instead.
+        let plan = try await backend.diskCleanupPlan(udid: device.udid)
+        self.setDiskCleanupPlan(plan, for: device.udid)
         return true
       } catch {
         self.recordFailure(
@@ -577,7 +581,7 @@ final class AppModel: ObservableObject {
       action: action.progressTitle, devices: snapshot, reservation: action.operationTitle
     ) { [weak self] device in
       guard let self else { return false }
-      self.record(.info, "\(action.progressTitle) \(device.name)")
+      self.record(.info, tr("%@ %@", tr(action.progressTitle), device.name))
       do {
         switch action {
         case .erase:
@@ -618,6 +622,7 @@ final class AppModel: ObservableObject {
         exceptCategories: keptCategoryIDs,
         keepLabels: keptServiceLabels,
         preserveBootState: preserveBootState,
+        platform: device.platform,
         osVersion: device.osVersion
       )
       setCachedDisabled(disabledDaemonCount(for: device), for: device.udid)
@@ -663,7 +668,7 @@ final class AppModel: ObservableObject {
     body: @escaping @MainActor (SimulatorDevice) async -> Bool
   ) async -> Int {
     for device in snapshot {
-      setOperation(reservation, for: device.udid)
+      setOperation(tr(reservation), for: device.udid)
     }
     var running: [String] = []
     var completed = 0
@@ -702,11 +707,11 @@ final class AppModel: ObservableObject {
 
   private func finishBatch(action: String, total: Int, failures: Int) {
     if failures == 0 {
-      record(.success, tr("%@ finished for all %d selected simulators", action, total))
+      record(.success, tr("%@ finished for all %d selected simulators", tr(action), total))
     } else {
       let message = tr(
         "%@ finished with %d failure%@ out of %d. Check Activity for details.",
-        action, failures, failures == 1 ? "" : tr("s"), total)
+        tr(action), failures, failures == 1 ? "" : tr("s"), total)
       recordFailure(message, present: true)
     }
   }
@@ -793,6 +798,10 @@ final class AppModel: ObservableObject {
     diskSizeLoadingUDIDs.formIntersection(available)
   }
 
+  private func setDiskCleanupPlan(_ plan: SimulatorDiskCleanupPlan, for udid: String) {
+    diskCleanupPlans[udid] = plan
+  }
+
   private func setCachedDisabled(_ count: Int, for udid: String) {
     lastKnownDisabled[udid] = count
     persistStateCache()
@@ -833,7 +842,7 @@ final class AppModel: ObservableObject {
     output
       .split(separator: "\n")
       .last
-      .map(String.init) ?? "Done"
+      .map(String.init) ?? tr("Done")
   }
 }
 

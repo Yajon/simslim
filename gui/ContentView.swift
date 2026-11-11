@@ -457,7 +457,10 @@ private struct ToolbarActionLabel: View {
   }
 
   var body: some View {
+    // Keep icon + text via SwiftUI. Setting NSToolbar.displayMode at runtime
+    // suspends SwiftUI's render transaction when the sidebar is toggled.
     Label(title, systemImage: systemImage)
+      .labelStyle(.titleAndIcon)
       .accessibilityLabel(title)
   }
 }
@@ -492,7 +495,7 @@ private struct CollapsibleToolbarSearch: View {
         )
       }
       .help(text.isEmpty ? prompt : tr("%@ — filter active", prompt))
-      .accessibilityLabel(text.isEmpty ? prompt : "\(prompt), filter active")
+      .accessibilityLabel(text.isEmpty ? prompt : tr("%@ — filter active", prompt))
     }
   }
 
@@ -989,7 +992,7 @@ private struct DiskCleanupCategoryToggle: View {
       .frame(maxWidth: .infinity, alignment: .leading)
 
       if category.canClean {
-        Toggle(tr("Remove %@", category.name), isOn: isSelected)
+        Toggle(tr("Remove %@", tr(category.name)), isOn: isSelected)
           .labelsHidden()
           .toggleStyle(.switch)
           .disabled(model.isBusy)
@@ -1131,12 +1134,12 @@ private struct CategoryToggle: View {
 
         Spacer(minLength: 4)
 
-        Toggle(tr("Keep %@ enabled", category.name), isOn: isKeptEnabled)
+        Toggle(tr("Keep %@ enabled", tr(category.name)), isOn: isKeptEnabled)
           .labelsHidden()
           .toggleStyle(.switch)
           .disabled(model.isBusy)
           .padding(.top, 1)
-          .help(tr("Keep all controllable services in %@ enabled", category.name))
+          .help(tr("Keep all controllable services in %@ enabled", tr(category.name)))
       }
 
       Label(category.approximateMemoryText, systemImage: "memorychip")
@@ -1232,7 +1235,7 @@ private struct AlwaysEnabledServiceRow: View {
           .font(.caption.monospaced())
           .lineLimit(2)
           .textSelection(.enabled)
-        Text(service.reason)
+        Text(tr(service.reason))
           .font(.caption2)
           .foregroundStyle(.secondary)
       }

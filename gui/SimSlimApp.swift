@@ -77,7 +77,6 @@ private final class ToolbarDisplayModeView: NSView {
   func applyDisplayMode() {
     guard let toolbar = window?.toolbar else { return }
     observeToolbarChanges(toolbar)
-    toolbar.displayMode = .iconAndLabel
     scheduleArrangement(in: toolbar)
   }
 

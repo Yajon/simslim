@@ -2,7 +2,7 @@
 
 [中文](README.zh-CN.md) | [English](README.md)
 
-通过关闭模拟器不需要的后台守护进程，在一台 Mac 上运行更多 iOS 模拟器。
+通过关闭模拟器不需要的后台守护进程，在一台 Mac 上运行更多 iOS、Apple TV（tvOS）、Apple Watch（watchOS）和 Apple Vision Pro（visionOS）模拟器。
 
 一个新启动的 iOS 模拟器会拉起大约 180 个后台服务：Siri、Spotlight 索引、照片分析、News、锁屏壁纸、iCloud 同步等等。在你用模拟器做开发、测试或 CI 时，这些都不重要。simslim 会把这些服务关掉，让每个模拟器的内存大约降到原来的 1/4。同一台笔记本上，你就能从只能跑几个模拟器变成铺满一屏。
 
@@ -10,12 +10,13 @@ https://github.com/user-attachments/assets/f4665e41-43b4-49cd-9388-3da533e9fd7b
 
 _在一台 16 GB 的 M1 Pro 上同时运行 12 个瘦身模拟器，每个由各自的 Claude Code agent 通过 MobAI 驱动。原生模拟器在大约 5 个时就开始卡顿了。_
 
-# 新增功能（原仓库对比）
+# 本分支的适配（相对上游 main）
 
-- 适配低版本Xcode
-- 支持macOS 13系统版本
-- 添加中文语言，支持应用内切换语言
-- 打包脚本添加ARCHS变量支持多架构和指定架构的构建
+- **低版本 Xcode**：Swift 源码可在 Xcode 15.1 / Swift 5.9 下用 `swiftc -warnings-as-errors` 编译；并发批处理里跨 `await` 修改 actor 隔离属性的写法已改为同步辅助方法。CI 仍使用 Xcode 26.6。
+- **最低系统版本**：应用可运行于 macOS 13 及以上（`gui/Info.plist` 的 `LSMinimumSystemVersion` 与 `scripts/build-app.sh` 的 `MACOS_DEPLOYMENT_TARGET` 同为 13.0）；macOS 14+ 的 SwiftUI 类型通过 `#available` 回退兼容。
+- **中英文切换**：工具栏 Language 菜单可在 English / 简体中文之间切换，选择会被保存并在重启应用后生效；所有界面文案经 `tr()` 查找 `gui/zh-Hans.lproj/Localizable.strings`。
+- **多架构打包**：`ARCHS` 支持 arm64 / x86_64 / universal / all，产物含通用包与按架构的精简包。
+- **多平台运行时**：`--preserve-boot-state` 与 `--no-reboot` 的选择按 CLI 的版本门槛判断（iOS/tvOS 18.5、watchOS 11.5、visionOS 2.5 及以上）。
 
 ## 数据
 
@@ -42,7 +43,9 @@ brew install mobai-app/tap/simslim
 go install github.com/mobai-app/simslim/cmd/simslim@latest
 ```
 
-仅支持 macOS，并且需要装有 iOS 模拟器运行时的 Xcode，因为 simslim 是通过 `xcrun simctl` 来驱动模拟器的。
+仅支持 macOS，并且需要装有 iOS、tvOS、watchOS 或 visionOS 模拟器运行时的 Xcode，因为 simslim 是通过 `xcrun simctl` 来驱动模拟器的。四种平台使用相同的命令和服务配置；`list`、`top` 和 macOS 应用会显示每个设备的平台，JSON 设备记录也包含 `platform` 与 `osVersion`。
+
+macOS 应用最低支持 macOS 13，可用 Xcode 15.1（Swift 5.9）或更新版本构建；CI 使用 Xcode 26.6。
 
 ## macOS 应用
 
@@ -52,6 +55,9 @@ go install github.com/mobai-app/simslim/cmd/simslim@latest
 - 可搜索的服务配置，含逐个守护进程的控制与用途说明。
 - 只读的磁盘分析，加上对允许列表内数据的确认式清理。
 - 克隆、重命名、抹除、删除，以及 Finder 快捷入口。
+- 工具栏 Language 菜单切换 English / 简体中文，重启应用后生效。
+
+应用最低支持 macOS 13（Info.plist 与构建脚本的部署目标一致），并已在 Xcode 15.1 / Swift 5.9 下验证编译。
 
 用 Go 和 Xcode 本地构建：
 
@@ -78,6 +84,8 @@ simslim profiles <id>    # 某类别下的 launchd 标签
 simslim on <udid>        # 瘦身一个模拟器并重启为瘦身状态
 simslim on <udid> --no-reboot   # 仅对当前启动会话瘦身，不重启
 simslim off <udid>       # 还原为原生状态
+simslim enable <udid> icloud,photos   # 不重启，立即恢复服务
+simslim disable <udid> icloud         # 不重启，再次关闭
 simslim status <udid>    # 受管理的 launchd 标签状态（不是进程计数）
 simslim verify <udid> --profile ci.json   # 精确匹配配置；有偏差时返回非零
 simslim doctor <udid> --requires push,storekit,universal-links
@@ -93,9 +101,10 @@ simslim boot <udid>      # 启动模拟器并等待其服务就绪
 simslim shutdown <udid>  # 关闭已启动的模拟器
 simslim erase <udid>     # 抹除应用、数据、设置以及瘦身覆盖项
 simslim delete <udid>    # 永久删除一个模拟器
+simslim watch --profile dev.json      # 持续瘦身新模拟器，直到 Ctrl-C
 ```
 
-只读和模拟器管理类命令都支持 `--json`，便于集成和 macOS 应用使用。
+只读命令、模拟器管理类命令以及 `enable`、`disable` 都支持 `--json`，便于集成和 macOS 应用使用。
 
 保留你确实需要的某个类别，比如 Spotlight 搜索：
 
@@ -128,7 +137,8 @@ simslim on <udid> --keep com.apple.apsd
 | `messaging`    | 信息与 FaceTime        | iMessage、FaceTime、通话和身份服务。                   | 60  |
 | `connectivity` | 共享与设备互联         | AirDrop、连续互通、CarPlay、Watch 和 查找 服务。       | 65  |
 | `telemetry`    | 广告、诊断与遥测       | DeviceCheck、广告隐私、分析、诊断和反馈服务。          | 105 |
-| `other`        | 其它后台服务           | 钱包、商务服务、资源及其它杂项后台守护进程。           | 195 |
+| `mdm`          | 设备管理               | 声明式设备管理与受管理资源服务。                       | 10  |
+| `other`        | 其它后台服务           | 钱包、App Clips、商务服务、资源及其它杂项后台守护进程。 | 225 |
 
 内存数字为 iOS 26.5 干净启动的中位数，不可叠加；详见[测量方法](docs/category-memory.md)。运行 `simslim profiles <id>` 可查看某类别下的守护进程。
 
@@ -208,9 +218,37 @@ simslim verify <udid> --profile ci.json || simslim on <udid> --profile ci.json
 simslim on <udid> --no-reboot --profile ci.json
 ```
 
-在 iOS 18.5 及更新版本上，这纯粹是更快的一条路径；覆盖项同样被持久化，所以下次启动也会以瘦身状态起来。在 iOS 17.x 和 18.3 上，由于无法持久化覆盖项，这是唯一能瘦身的方式，且状态在下次重启时丢失：每次启动后都要重新运行。当 `status` 读到一个这样的模拟器时会说明这一点，`status --json` 也会带上一个 `persistent` 字段。
+在 iOS/tvOS 18.5、watchOS 11.5、visionOS 2.5 及更新版本上，覆盖项同样被持久化，所以下次启动也会以瘦身状态起来。更早的运行时无法持久化覆盖项，这是唯一能瘦身的方式，且状态在下次重启时丢失：每次启动后都要重新运行。当 `status` 读到一个这样的模拟器时会说明这一点，`status --json` 也会带上一个 `persistent` 字段。
 
-实时瘦身只朝「更被关闭」的方向移动。已经被关闭到配置之外的受管理守护进程会原样保留，因为要实时重新启动一个守护进程需要逐标签的 bootstrap；`simslim off` 通过重启来恢复它们。
+实时瘦身只朝「更被关闭」的方向移动。已经被关闭到配置之外的受管理守护进程会原样保留，因为要实时重新启动一个守护进程需要逐标签的 bootstrap；可用 `enable` 不重启地恢复，或用 `simslim off` 通过重启恢复。
+
+### 不重启地重新启用服务
+
+瘦身后的模拟器有时需要临时恢复某个功能（例如同步测试要用 iCloud、选择器要用照片）。`enable` 会在运行中的模拟器里立即恢复指定类别或守护进程，`disable` 再关回去，两者都不重启、也不改动配置本身。
+
+```sh
+simslim enable <udid> icloud,photos       # 也可写：simslim enable <udid> icloud com.apple.apsd
+simslim doctor <udid> --requires icloud   # 立即变为可用
+simslim disable <udid> icloud             # 再次关闭，仍不重启
+```
+
+需要已启动的模拟器。`--json` 会用 `notStarted` 列出那些已被 launchd 重新启用、但要下次启动才会加载的守护进程，用 `stillEnabled` 列出 `disable` 特意保留运行的服务。要让改动持久化，加 `--save <profile.json>`：命令会把类别写进文件的 `except`（守护进程写进 `keep`），或从中移除，之后 `on`、`watch`、`verify` 都会与新配置一致。
+
+```sh
+simslim enable <udid> icloud --save dev.json   # 立即生效，并写入 dev.json
+simslim watch --profile dev.json               # 每次启动都保留 iCloud
+```
+
+### 自动瘦身每一个新模拟器
+
+`simslim watch` 不需要为每台设备单独执行命令。对于处于关机状态、且运行时能持久化覆盖项（iOS/tvOS 18.5、watchOS 11.5、visionOS 2.5 或更新）的模拟器，watch 会在它启动前把配置写入禁用覆盖项，因此首次启动就不会拉起这些守护进程。它用 kqueue 跟踪设备集目录，在 `simctl create` 后几毫秒内从 `device.plist` 播种新设备；已经启动的模拟器则在启动时以不重启方式瘦身。`xcodebuild` 并行测试创建的克隆体也由此覆盖。
+
+```sh
+simslim watch --except web,store &
+xcodebuild test -scheme App -parallel-testing-enabled YES -parallel-testing-worker-count 4 ...
+```
+
+它接受与 `on` 相同的 `--profile` / `--except` / `--keep`，默认扫描 `default` 与 `testing` 设备集，可用 `--set` 指定其它设备集，运行到 Ctrl-C 为止。
 
 ## 磁盘清理
 
@@ -271,13 +309,13 @@ func main() {
 }
 ```
 
-这个包从不向 stdout 写入——它返回值，并通过你传入的 `simslim.Reporter` 回调来汇报进度。`simslim.Categories`、`simslim.Features` 和 `simslim.SlimmableSet()` 暴露的是与 CLI 完全相同的允许列表。仅支持 macOS，因为所有操作都通过 `xcrun simctl` 执行。
+这个包从不向 stdout 写入——它返回值，并通过你传入的 `simslim.Reporter` 回调来汇报进度。`simslim.Categories`、`simslim.Features` 和 `simslim.SlimmableSet()` 暴露的是与 CLI 完全相同的允许列表；`simslim.EnableServices`、`simslim.DisableServices` 和 `simslim.SaveServices` 分别支撑 `enable`、`disable` 与 `--save`。仅支持 macOS，因为所有操作都通过 `xcrun simctl` 执行。
 
 ## 工作原理
 
 `simslim on` 会把所选 launchd 标签的持久化 `launchctl disable` 条目写入模拟器自己的 launchd 数据库，然后重启它。这些条目在重启后依然生效，因此模拟器从此只需一次启动就会以瘦身状态起来。`simslim off` 清除它们并重启回原生状态。你的 Mac 永远不会被触碰，只动你指定的那个模拟器，且只动那些可以安全关闭的服务。核心工作流服务（如 `sharingd`），以及少数一旦关闭会让模拟器卡死的服务，会被保留运行。
 
-已验证可持久化的最早运行时是 iOS 18.5。iOS 17.x 和 18.3 会接受每次 `launchctl disable`，但模拟器在重启后会回到原生状态。`simslim on` 在启动或改动 launchd 状态之前，会拒绝早于 18.5 的运行时，并指向 `--no-reboot`（只瘦身当前启动会话，见[不重启式瘦身](#不重启式瘦身)）。支持的运行时在重启后仍会被读回，如果有任何请求的覆盖项丢失，命令会失败而不是谎报成功。
+已验证可持久化的最早运行时是 iOS 18.5。iOS 17.x 和 18.3 会接受每次 `launchctl disable`，但模拟器在重启后会回到原生状态。持久化瘦身的版本门槛为 iOS/tvOS 18.5、watchOS 11.5 或 visionOS 2.5 及更新版本；tvOS、watchOS 与 visionOS 的门槛按对应的 iOS 代际推算，并非各自独立测量的最早持久化运行时。`simslim on` 在启动或改动 launchd 状态之前，会拒绝更早的运行时，并指向 `--no-reboot`（只瘦身当前启动会话，见[不重启式瘦身](#不重启式瘦身)）。每个平台在重启后仍会被读回，如果有任何请求的覆盖项丢失，命令会失败而不是谎报成功。`off` 在旧运行时依然可用。
 
 这是每个模拟器各自的状态，而非全局设置。守护进程的关闭只发生在那一个模拟器的 launchd 数据库里，不会波及别处。`simslim clone` 会连同已安装的应用、应用数据和设置一起，复制源模拟器精确的 SimSlim 受管理配置。它还会重定位模拟器本地的符号链接、重新生成应用注册数据库，并清理复制过来的系统缓存与临时文件。在结束前，它会启动克隆体并审计其运行进程，检查是否存在指向源的路径。克隆体随后关机，源模拟器恢复到克隆前的启动状态。
 
@@ -296,8 +334,11 @@ simslim repair-clone <source-udid> <clone-udid>
 关闭服务对大多数开发、UI 自动化和 CI 都没问题，但有些功能确实会停止工作。值得知道的几点：
 
 - Spotlight 和设置内搜索会无结果返回（`search`）。
+- 没有 `searchd` 时，文件应用与文稿选择器的「最近项目」显示「内容不可用」（`search`）。
 - 推送通知需要 `apsd`，StoreKit 测试需要 `storekitd`（`store`）。
 - 通用链接需要 `swcd`（`web`）。
+- 声明式设备管理，以及依赖它的 MDM / 配置描述文件工作流需要 `mdm`。
+- App Clips 需要 `clipserviced`，VoiceOver 语音等无障碍资源下载需要 `axassetsd`（`other`）。
 - 通讯录、照片和日历选择器在缺少对应类别时可能会出问题。
 
 `simslim profiles` 会列出每个类别，因此你可以用 `--except` 保留某个类别，或用 `--keep` 保留单独的守护进程。

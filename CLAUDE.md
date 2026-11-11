@@ -187,7 +187,17 @@ The app is a thin front end that shells out to that bundled binary.
 two in step). `swiftc -warnings-as-errors` rejects an API newer than the
 deployment target, so macOS 14+ SwiftUI types need an `if #available(macOS 14.0, *)`
 branch with a macOS 13 fallback: `ContentView.swift`'s `SimulatorEmptyState`
-wraps `ContentUnavailableView` (macOS 14) that way.
+wraps `ContentUnavailableView` (macOS 14) that way. Local builds are verified
+with Xcode 15.1 (Swift 5.9); CI uses Xcode 26.6. Swift 5.9 rejects mutating an
+actor-isolated dictionary subscript inside an async closure, so batch results
+are staged and written through synchronous helpers.
+
+**Localization** is table-driven: every user-visible string goes through `tr()`
+(`gui/Localization.swift`), with English as the key and translations in
+`gui/zh-Hans.lproj/Localizable.strings`. The Language menu persists the choice
+and relaunches, because relabeling `NSToolbarItem` in place crashes on macOS.
+Go-side category, service-description, and always-on reason strings are also
+displayed through `tr()`, so new CLI copy needs a matching table entry.
 
 ## Safety invariants — preserve these
 

@@ -198,7 +198,10 @@ struct BatchProgress: Equatable {
   }
 
   var runningText: String {
-    running.isEmpty ? "\(action)…" : "\(action) \(running.joined(separator: ", "))…"
+    let localizedAction = tr(action)
+    return running.isEmpty
+      ? tr("%@…", localizedAction)
+      : tr("%@ %@…", localizedAction, running.joined(separator: ", "))
   }
 }
 

@@ -76,6 +76,12 @@ The SwiftUI app bundles the CLI and adds:
 - Read-only disk analysis plus confirmed cleanup of allowlisted data.
 - Clone, rename, erase, delete, and Finder shortcuts.
 
+The app runs on macOS 13 or newer (`LSMinimumSystemVersion` and the build
+script's deployment target are kept in step). Its Swift sources compile with
+Xcode 15.1 / Swift 5.9 as well as the Xcode 26.6 used in CI, so newer SwiftUI
+types are guarded by availability fallbacks. The toolbar Language menu switches
+the UI between English and 简体中文; the choice is applied after a relaunch.
+
 Build it locally with Go and Xcode:
 
 ```sh

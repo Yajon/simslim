@@ -84,6 +84,7 @@ struct SimSlimBackend {
     exceptCategories: Set<String>,
     keepLabels: Set<String>,
     preserveBootState: Bool,
+    platform: String?,
     osVersion: String
   ) async throws -> String {
     var arguments = ["on"]
@@ -94,7 +95,7 @@ struct SimSlimBackend {
       arguments.append(contentsOf: ["--keep", keepLabels.sorted().joined(separator: ",")])
     }
     if preserveBootState {
-      if supportsPersistentOverrides(osVersion) {
+      if supportsPersistentOverrides(platform: platform, osVersion: osVersion) {
         arguments.append("--preserve-boot-state")
       } else {
         arguments.append("--no-reboot")
@@ -104,12 +105,25 @@ struct SimSlimBackend {
     return try await execute(arguments).text
   }
 
-  private func supportsPersistentOverrides(_ osVersion: String) -> Bool {
-    let components = osVersion.split(separator: ".").compactMap { Int($0) }
-    guard components.count >= 2 else { return false }
+  /// Mirrors the CLI's `Device.SupportsPersistentOverrides` gate: the iOS 18.5
+  /// release generation is iOS/tvOS 18.5, watchOS 11.5, or visionOS 2.5.
+  /// Older runtimes only hold disable overrides for the current boot session,
+  /// so the GUI asks for `--no-reboot` instead of `--preserve-boot-state`.
+  private func supportsPersistentOverrides(platform: String?, osVersion: String) -> Bool {
+    let minimumMajor: Int
+    // Older CLI output may omit `platform` (nil or empty); the CLI treats that
+    // as iOS, so the GUI must use the same 18.5 gate for those device records.
+    switch platform ?? "iOS" {
+    case "", "iOS", "tvOS": minimumMajor = 18
+    case "watchOS": minimumMajor = 11
+    case "visionOS": minimumMajor = 2
+    default: return false
+    }
+    let components = osVersion.split(separator: ".", maxSplits: 2).compactMap { Int($0) }
+    guard components.count >= 2, components[1] >= 0 else { return false }
     let major = components[0]
     let minor = components[1]
-    return major > 18 || (major == 18 && minor >= 5)
+    return major > minimumMajor || (major == minimumMajor && minor >= 5)
   }
 
   func restore(udid: String, preserveBootState: Bool) async throws -> String {

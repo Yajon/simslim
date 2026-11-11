@@ -24,15 +24,15 @@
 "RAM USAGE" = "内存占用";
 
 "Loading simulators…" = "正在加载模拟器…";
-"No iOS Simulators" = "没有 iOS 模拟器";
+"No Simulators" = "没有模拟器";
 "No Matches" = "无匹配结果";
-"Install an iOS Simulator runtime in Xcode." = "请在 Xcode 中安装 iOS 模拟器运行时。";
-"Try a different name, UDID, or iOS version." = "请尝试其他名称、UDID 或 iOS 版本。";
+"Install an iOS, tvOS, watchOS, or visionOS Simulator runtime in Xcode." = "请在 Xcode 中安装 iOS、tvOS、watchOS 或 visionOS 模拟器运行时。";
+"Try a different name, UDID, or OS version." = "请尝试其他名称、UDID 或系统版本。";
 
 "Select simulators to change their service profile" = "选择模拟器以更改其服务配置";
 "Select simulators to review reclaimable disk data" = "选择模拟器以查看可清理的磁盘数据";
 "%d selected" = "已选中 %d 个";
-"· profile will disable %d services" = "· 该配置将停用 %d 项服务";
+"· profile will disable up to %d services" = "· 该配置最多停用 %d 项服务";
 "· analyzing disk usage…" = "· 正在分析磁盘占用…";
 "· %@ selected for cleanup" = "· 已选择清理 %@";
 "· disk analysis pending" = "· 磁盘分析待完成";
@@ -94,8 +94,8 @@
 "Clear service search" = "清除服务搜索";
 "Preserve current boot state" = "保持当前启动状态";
 "A simulator that starts shutdown will return to shutdown after its service profile is changed." = "原本处于关机状态的模拟器，在服务配置更改完成后仍会回到关机状态。";
-"%d services will be disabled" = "将停用 %d 项服务";
-"Core workflow and deadlock-prone daemons are never disabled." = "核心工作流与易死锁的守护进程永远不会被停用。";
+"Up to %d services will be disabled" = "最多将停用 %d 项服务";
+"Core workflow and deadlock-prone daemons are never disabled. HomeKit’s homed stays enabled on watchOS, and the asset service mobileassetd on visionOS." = "核心工作流与易死锁的守护进程永远不会被停用。watchOS 会保留 HomeKit 的 homed，visionOS 会保留资源服务 mobileassetd。";
 "Uses ~%d MB RAM" = "占用约 %d MB 内存";
 "When disabled: " = "停用后：";
 "Keep %@ enabled" = "保留 %@";
@@ -200,6 +200,11 @@
 "No selection" = "未选择";
 "Simulators" = "个模拟器";
 "s" = "个";
+"Waiting to start…" = "等待开始…";
+"Analyzing disk usage…" = "正在分析磁盘占用…";
+"Done" = "完成";
+"%@…" = "%@…";
+"%@ %@…" = "%@ %@…";
 
 /* Activity messages */
 
@@ -297,7 +302,7 @@
 
 "Spotlight & Search" = "聚焦与搜索";
 "On-device Spotlight and in-Settings search services." = "设备端聚焦与设置内搜索服务。";
-"Spotlight and Settings search return no results." = "聚焦与设置搜索不返回结果。";
+"Spotlight and Settings search return no results, and Recents in Files and the document picker fails to load." = "聚焦与设置搜索不返回结果，文件应用与文稿选择器中的“最近项目”也无法加载。";
 
 "iCloud & Apple Account" = "iCloud 与 Apple 账户";
 "iCloud sync, Apple Account, keychain, and backup services." = "iCloud 同步、Apple 账户、钥匙串和备份服务。";
@@ -340,13 +345,19 @@
 "AirDrop, Continuity, CarPlay, Watch, and Find My connectivity will not work." = "隔空投送、连续互通、CarPlay、Watch 和查找的连接将无法使用。";
 "Required for system share sheets." = "系统共享面板所需。";
 
+"Device Management" = "设备管理";
+"Declarative device management and managed asset services." = "声明式设备管理与受管理资源服务。";
+"Declarative device management, and MDM or configuration-profile workflows that use it, will not work." = "声明式设备管理，以及依赖它的 MDM 或配置描述文件工作流将无法使用。";
+"Hosts the dictation service; without it the system Spotlight app leaks memory." = "承载听写服务；缺少它时系统聚焦应用会泄漏内存。";
+"Required for timely XCUITest app launches (DTServiceHub / GameKit)." = "XCUITest 及时启动应用所必需（DTServiceHub / GameKit）。";
+
 "Ads, Diagnostics & Telemetry" = "广告、诊断与遥测";
 "DeviceCheck, ad privacy, analytics, diagnostics, and feedback services." = "DeviceCheck、广告隐私、分析、诊断和反馈服务。";
 "DeviceCheck plus analytics, diagnostics, and feedback services are unavailable." = "DeviceCheck 以及分析、诊断和反馈服务不可用。";
 
 "Other Background Services" = "其他后台服务";
-"Wallet, business services, assets, and miscellaneous background daemons." = "钱包、商务服务、资源和杂项后台守护进程。";
-"Wallet, merchant, business, asset, and miscellaneous background services are unavailable." = "钱包、商户、商务、资源和杂项后台服务不可用。";
+"Wallet, App Clips, business services, assets, and miscellaneous background daemons." = "钱包、App Clips、商务服务、资源和杂项后台守护进程。";
+"Wallet, App Clips, accessibility asset downloads, merchant, business, and miscellaneous background services are unavailable." = "钱包、App Clips、无障碍资源下载、商户、商务及杂项后台服务不可用。";
 
 /* Go CLI data — disk cleanup categories */
 
@@ -495,7 +506,7 @@
 "Processes health events and related notifications." = "处理健康事件及相关通知。";
 "Synchronizes clinical health records." = "同步临床健康记录。";
 "Analyzes Wallet transactions and financial-health data." = "分析钱包交易与财务健康数据。";
-"Manages HomeKit accessories, rooms, and automations." = "管理 HomeKit 配件、房间与自动化。";
+"Manages HomeKit accessories, rooms, and automations. Kept enabled on watchOS." = "管理 HomeKit 配件、房间与自动化。在 watchOS 上保持启用。";
 "Processes HomeKit events and automation triggers." = "处理 HomeKit 事件与自动化触发器。";
 "Runs Apple Fitness content and background services." = "运行 Apple Fitness 内容与后台服务。";
 "Manages active Apple Fitness sessions." = "管理进行中的 Apple Fitness 健身活动。";
@@ -570,5 +581,11 @@
 "Calculates storage usage shown by the system." = "计算系统显示的存储占用。";
 "Shares Focus, presence, and status between devices." = "在设备间共享专注模式、在线状态与状态。";
 "Determines regional availability for system features." = "确定系统功能的区域可用性。";
-"Downloads and manages system asset packages." = "下载并管理系统资源包。";
+"Downloads and manages system asset packages. Kept enabled on visionOS." = "下载并管理系统资源包。在 visionOS 上保持启用。";
 "Enforces managed passcode requirements." = "强制执行受管理的密码要求。";
+
+"Applies declarative device management configurations." = "应用声明式设备管理配置。";
+"Applies per-user declarative management configurations." = "应用按用户划分的声明式管理配置。";
+"Downloads assets referenced by management declarations." = "下载管理声明所引用的资源。";
+"Downloads accessibility assets such as speech voices." = "下载语音等无障碍资源。";
+"Downloads, launches, and manages App Clips." = "下载、启动并管理 App Clips。";
